@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.67.1" />
+
+  <title>The Mandelbrot set in R &middot; Dandelbrot</title>
+
+    
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/androidstudio.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="/">Dandelbrot</a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/about/"><i class='fa fa-user fa-fw'></i>About</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/contact/"><i class='fa fa-phone fa-fw'></i>Contact</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/dandelbrot" rel="me" target="_blank"><i class="fab fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/danBurrell" rel="me" target="_blank"><i class="fab fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://stackoverflow.com/users/dandelbrot" rel="me" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i>Stack Overflow</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2016. All rights reserved.</small>
+  </div>
+  <div class="small-print">
+    <small>Built with&nbsp;<a href="https://gohugo.io/" target="_blank">Hugo</a></small>
+    <small>Theme&nbsp;<a href="https://github.com/yoshiharuyamashita/blackburn" target="_blank">Blackburn</a></small>
+  </div>
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>The Mandelbrot set in R</h1>
+  <h2></h2>
+</div>
+<div class="content">
+
+  <div class="post-meta">
+
+  <div>
+    <i class="fa fa-calendar fa-fw"></i>
+    <time>18 Mar 2020, 00:00</time>
+  </div>
+
+  
+
+  
+  
+  
+  
+
+  
+  
+  
+  <div>
+    <i class="fa fa-tags fa-fw"></i>
+    
+      <a class="post-taxonomy-tag" href="/tags/fractals-in-r">fractals in R</a>
+    
+  </div>
+  
+  
+
+</div>
+
+  
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This being my first post to Dandelbrot.com, I thought it only fitting to post something about the Mandelbrot set. I determined to code up a mandelbrot set fractal generator in R. After a little digging I came across <a href="https://www.r-bloggers.com/the-mandelbrot-set-in-r/">this R-bloggers post</a> from 2014. I figured, rather than reinvent the wheel, I might as well just borrow code from here, with all due kutos to Myles Harrison, the original author.</p>
+<p>The Mandelbrot set and its colourful depictions as the Mandelbrot fractal image is probably one of the better known fractal objects. It begins with complex numbers of the form <span class="math inline">\(z = a + bi\)</span>, where <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are real numbers, and <span class="math inline">\(i\)</span> is the imaginary unit satisfying <span class="math inline">\(i^2 = -1\)</span>. The Mandelbrot set is generated as follows:</p>
+<ol style="list-style-type: decimal">
+<li>Initialise a complex set of numbers in the complex plane that are all <span class="math inline">\(z=0\)</span>.</li>
+<li>Iterate the formula: <span class="math inline">\(z_{n+1}=z_n^2 + c\)</span> such that <span class="math inline">\(c\)</span> is a set of complex numbers that fills the complex plane.</li>
+<li>The Mandelbrot set is the set where <span class="math inline">\(z\)</span> remains bounded for all <span class="math inline">\(n\)</span>.</li>
+</ol>
+</div>
+<div id="implementation-in-r" class="section level2">
+<h2>Implementation in R</h2>
+<p>The idea here is to pick some parameters about the space (such as range and resolution for <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, number of iterations, etc.) and then iterate. <a href="https://everydayanalytics.ca/2014/12/the-mandelbrot-set-in-r.html">Myles Harrison</a> builds up the code by taking the reader through an iterative process, starting from a naive code using loops, to a vectorised version, through to a functional version. I’m not going to go through the process here, but I will recode the final vectorised function below:</p>
+<pre class="r"><code>mandelbrot_generator &lt;- function(
+    p = 2, 
+    q = 1,
+    xmin = -2.1, # minimum x value
+    xmax = 0.8,  # maximum x value
+    nx = 500, 
+    ymin = -1.3, # minimum y value
+    ymax = 1.3,  # maximum y value
+    ny = 500,
+    n = 100, 
+    showplot = TRUE, # If TRUE then display image,
+    showvals = FALSE,
+    cols = colorRampPalette(c(&quot;black&quot;,&quot;cyan&quot;,&quot;cyan3&quot;,&quot;black&quot;))(11)) 
+{
+    
+    # variables
+    x &lt;- seq(xmin, xmax, length.out=nx)
+    y &lt;- seq(ymin, ymax, length.out=ny)
+    c &lt;- outer(x,y*1i,FUN=&quot;+&quot;)
+    z &lt;- matrix(0.0, nrow=length(x), ncol=length(y))
+    k &lt;- matrix(0.0, nrow=length(x), ncol=length(y))
+    
+    for (rep in 1:n) { 
+        index &lt;- which(Mod(z) &lt; 2)
+        z[index] &lt;- z[index]^p + c[index]*q
+        k[index] &lt;- k[index] + 1
+    }
+    
+    if (showplot==TRUE) { image(x,y,k,col=cols, xlab=&quot;Re(c)&quot;, ylab=&quot;Im(c)&quot;)}
+    if (showvals==TRUE) {return(k)}
+    
+}</code></pre>
+<p>Running this function with all the arguments as set (note that these differ somewhat to the arguments in the original) leads to the following:</p>
+<pre class="r"><code>mandelbrot_generator(p=2, q=1)</code></pre>
+<p><img src="/post/2020-03-18-the-mandelbrot-set-in-r_files/figure-html/unnamed-chunk-2-1.png" width="672" />
+This is the code I used to create the logo for Dandelbrot.com. I find fractal geometry hugely pleasing. I love dynamical systems and the idea that such simple iterative functions can produce such complex and intricate behaviour. The Mandelbrot set is just a commonly known embodiment of this. I urge you to play around with the code and see what else you can come up with. For example, what adjustments to the basic iterative equation can you make, and how does it impact the result? Below, I have tweaked the original <code>mandelbrot_generator()</code> function to enable general powers:
+<span class="math display">\[
+z_{n+1} = z_n^p + c^q.
+\]</span>
+When <span class="math inline">\(p=4\)</span> and <span class="math inline">\(q=0.5\)</span> and the necessary adjustments to the plotting window are made, the following image is generated:</p>
+<pre class="r"><code>mandelbrot_generator(p=4, q=0.5, xmin = -2.8, xmax = 2, ymin = -2.5, ymax = 2.5, nx=1000, ny=1000, n=75)</code></pre>
+<p><img src="/post/2020-03-18-the-mandelbrot-set-in-r_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>This is a very simple tweak, but I imagine with some thought and creativity, some really interesting things might crop up. Also, please contact me if you’ve played with R for generating other fractal objects, dynamical systems and chaotic systems and the likes. I’d be interested to see what other people have come up with.</p>
+</div>
+
+  
+  <h4><i class="fa-share-alt" aria-hidden="true"></i>&nbsp;Share!</h4>
+<ul class="share-buttons">
+	<li><a href="https://www.facebook.com/sharer/sharer.php?u=%2fpost%2fthe-mandelbrot-set-in-r%2f" target="_blank" title="Share on Facebook"><i class="fa-facebook" aria-hidden="true"></i><span class="sr-only">Share on Facebook</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="https://twitter.com/intent/tweet?source=%2fpost%2fthe-mandelbrot-set-in-r%2f&via=HorribleGeek" target="_blank" title="Tweet"><i class="fa-twitter" aria-hidden="true"></i><span class="sr-only">Tweet</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="https://plus.google.com/share?url=%2fpost%2fthe-mandelbrot-set-in-r%2f" target="_blank" title="Share on Google+"><i class="fa-google-plus" aria-hidden="true"></i><span class="sr-only">Share on Google+</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://www.tumblr.com/share?v=3&u=%2fpost%2fthe-mandelbrot-set-in-r%2f" target="_blank" title="Post to Tumblr"><i class="fa-tumblr" aria-hidden="true"></i><span class="sr-only">Post to Tumblr</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://pinterest.com/pin/create/button/?url=%2fpost%2fthe-mandelbrot-set-in-r%2f" target="_blank" title="Pin it"><i class="fa-pinterest-p" aria-hidden="true"></i><span class="sr-only">Pin it</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://www.reddit.com/submit?url=%2fpost%2fthe-mandelbrot-set-in-r%2f" target="_blank" title="Submit to Reddit"><i class="fa-reddit-alien" aria-hidden="true"></i><span class="sr-only">Submit to Reddit</span></a>
+	</li>
+</ul>
+
+
+<style>
+	ul.share-buttons{
+	  list-style: none;
+	  padding: 0;
+	}
+
+	ul.share-buttons li{
+	  display: inline;
+	}
+
+	ul.share-buttons .sr-only{
+	  position: absolute;
+	  clip: rect(1px 1px 1px 1px);
+	  clip: rect(1px, 1px, 1px, 1px);
+	  padding: 0;
+	  border: 0;
+	  height: 1px;
+	  width: 1px;
+	  overflow: hidden;
+	}
+</style>
+
+
+  
+<div class="prev-next-post pure-g">
+  <div class="pure-u-1-24" style="text-align: left;">
+    
+    <a href="/post/2015-07-23-r-rmarkdown/"><i class="fa fa-chevron-left"></i></a>
+    
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="prev">
+      <a href="/post/2015-07-23-r-rmarkdown/">Hello R Markdown</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-2-24">
+    &nbsp;
+  </div>
+  <div class="pure-u-10-24">
+    
+  </div>
+  <div class="pure-u-1-24" style="text-align: right;">
+    
+  </div>
+</div>
+
+
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'Your Disqus shortname';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+</div>
+</div>
+<script src="/js/ui.js"></script>
+<script src="/js/menus.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'Your Google Analytics tracking ID', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+<script src="/js/math-code.js"></script>
+  <script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  
+
+
+</body>
+</html>
+
