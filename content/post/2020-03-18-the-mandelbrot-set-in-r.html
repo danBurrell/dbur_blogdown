@@ -16,12 +16,15 @@ topics: []
 
 
 <p>This being my first post to Dandelbrot.com, I thought it only fitting to post something about the Mandelbrot set. I determined to code up a mandelbrot set fractal generator in R. After a little digging I came across <a href="https://www.r-bloggers.com/the-mandelbrot-set-in-r/">this R-bloggers post</a> from 2014. I figured, rather than reinvent the wheel, I might as well just borrow code from here, with all due kudos to Myles Harrison, the original author.</p>
+<div id="a-very-basic-outline-of-the-mandelbrot-set" class="section level2">
+<h2>A very basic outline of the Mandelbrot set</h2>
 <p>The Mandelbrot set and its colourful depictions as the Mandelbrot fractal image is probably one of the better known fractal objects. It begins with complex numbers of the form <span class="math inline">\(z = a + bi\)</span>, where <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> are real numbers, and <span class="math inline">\(i\)</span> is the imaginary unit satisfying <span class="math inline">\(i^2 = -1\)</span>. The Mandelbrot set is generated as follows:</p>
 <ol style="list-style-type: decimal">
 <li>Initialise a complex set of numbers in the complex plane that are all <span class="math inline">\(z=0\)</span>.</li>
 <li>Iterate the formula: <span class="math inline">\(z_{n+1}=z_n^2 + c\)</span> such that <span class="math inline">\(c\)</span> is a set of complex numbers that fills the complex plane.</li>
 <li>The Mandelbrot set is the set where <span class="math inline">\(z\)</span> remains bounded for all <span class="math inline">\(n\)</span>.</li>
 </ol>
+</div>
 <div id="implementation-in-r" class="section level2">
 <h2>Implementation in R</h2>
 <p>The idea here is to pick some parameters about the space (such as range and resolution for <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, number of iterations, etc.) and then iterate. <a href="https://everydayanalytics.ca/2014/12/the-mandelbrot-set-in-r.html">Myles Harrison</a> builds up the code by taking the reader through an iterative process, starting from a naive code using loops, to a vectorised version, through to a functional version. I’m not going to go through the process here, but I will recode the final vectorised function below:</p>
