@@ -7,10 +7,46 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2016. All rights reserved.</copyright>
-    <lastBuildDate>Wed, 18 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bayesian</title>
+      <link>/tags/bayesian/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/bayesian/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Inverse Problems</title>
+      <link>/tags/inverse-problems/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/inverse-problems/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>UQ</title>
+      <link>/tags/uq/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/uq/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>VVUQ</title>
+      <link>/tags/vvuq/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/vvuq/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>fractals in R</title>

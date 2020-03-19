@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Dandelbrot</title>
-    <link>/post/</link>
-    <description>Recent content in Posts on Dandelbrot</description>
+    <title>Bayesian on Dandelbrot</title>
+    <link>/tags/bayesian/</link>
+    <description>Recent content in Bayesian on Dandelbrot</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2016. All rights reserved.</copyright>
     <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/bayesian/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -19,15 +19,6 @@
       
       <guid>/post/inverse-problems-and-uncertainty-quantification/</guid>
       <description>I’m interested in uncertainty quantification. There is a brief article in SIAM NEWS from 2014 which I just read that has piqued my interest further. The article, authored by Marco Iglesias and Andrew Stuart, discusses uncertainty quantification (UQ) in the context of inverse problems from a Bayesian perspective. Let’s have a look at the basic ideas set out in the article to get a feel for this important and “exciting area of research in the mathematical sciences” that brings together skills and knowledge from “analysis, computation, probability, and statistics.</description>
-    </item>
-    
-    <item>
-      <title>The Mandelbrot set in R</title>
-      <link>/post/the-mandelbrot-set-in-r/</link>
-      <pubDate>Wed, 18 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/post/the-mandelbrot-set-in-r/</guid>
-      <description>This being my first post to Dandelbrot.com, I thought it only fitting to post something about the Mandelbrot set. I determined to code up a mandelbrot set fractal generator in R. After a little digging I came across this R-bloggers post from 2014. I figured, rather than reinvent the wheel, I might as well just borrow code from here, with all due kudos to Myles Harrison, the original author.</description>
     </item>
     
   </channel>

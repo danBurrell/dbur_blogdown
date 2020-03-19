@@ -3,6 +3,41 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/tags/bayesian/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/inverse-problems/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/inverse-problems-and-uncertainty-quantification/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/uq/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/vvuq/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/about/</loc>
     <lastmod>2020-03-18T00:00:00+00:00</lastmod>
   </url>
@@ -14,16 +49,6 @@
   
   <url>
     <loc>/tags/fractals-in-r/</loc>
-    <lastmod>2020-03-18T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2020-03-18T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-03-18T00:00:00+00:00</lastmod>
   </url>
   

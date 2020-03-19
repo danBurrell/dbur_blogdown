@@ -13,6 +13,15 @@
     
     
     <item>
+      <title>Inverse Problems and Uncertainty Quantification</title>
+      <link>/post/inverse-problems-and-uncertainty-quantification/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/inverse-problems-and-uncertainty-quantification/</guid>
+      <description>I’m interested in uncertainty quantification. There is a brief article in SIAM NEWS from 2014 which I just read that has piqued my interest further. The article, authored by Marco Iglesias and Andrew Stuart, discusses uncertainty quantification (UQ) in the context of inverse problems from a Bayesian perspective. Let’s have a look at the basic ideas set out in the article to get a feel for this important and “exciting area of research in the mathematical sciences” that brings together skills and knowledge from “analysis, computation, probability, and statistics.</description>
+    </item>
+    
+    <item>
       <title>About</title>
       <link>/about/</link>
       <pubDate>Wed, 18 Mar 2020 00:00:00 +0000</pubDate>

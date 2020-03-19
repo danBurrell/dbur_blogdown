@@ -1,0 +1,75 @@
+---
+title: Inverse Problems and Uncertainty Quantification
+author: Daniel Burrell
+date: '2020-03-19'
+slug: inverse-problems-and-uncertainty-quantification
+categories:
+  - inverse problems
+  - uncertainty quantification
+  - UQ
+  - VVUQ
+  - Bayesian
+tags:
+  - UQ
+  - VVUQ
+  - Bayesian
+  - Inverse Problems
+description: ''
+topics: []
+---
+
+I'm interested in uncertainty quantification. There is a brief article in [SIAM NEWS from 2014](https://www.maths.nottingham.ac.uk/plp/pmzmi/siam.pdf) which I just read that has piqued my interest further. The article, authored by Marco Iglesias and Andrew Stuart, discusses uncertainty quantification (UQ) in the context of inverse problems from a Bayesian perspective. Let's have a look at the basic ideas set out in the article to get a feel for this important and "exciting area of research in the mathematical sciences" that brings together skills and knowledge from "analysis, computation, probability, and statistics."
+
+## Introduction
+Inverse problems arise across diverse disciplines from the physical, biological and social sciences, to applications in climatology, epidemiology and fluid dynamics. I myself have a particularly diverse interest in inverse problems across vastly different fields, ranging from astronomy and astrophysics, to geophysical and atmospheric fluid dynamics, to biodynamics and mathematical biology, including epidemiology (of human, animal and plant diseases). Iglesias and Stuart (2014) describe inverse problems as follows:
+
+> "... inverse problems confront mathematical models with data so that we can deduce the inputs needed to run the models; knowledge of these 
+> inputs can then be used to make predictions, and even to devise control strategies based on the predictions. Both the models and the data 
+> are typically uncertain, as are the resulting deductions and predictions; as a consequence, any decisions or control strategies based on 
+> the predictions will  be greatly improved if the uncertainty is made quantitative."
+
+So, what they're saying is that we often seek to develop mathematical models of real-life situations or phenomena, with the view to gaining some kind of predictive insight which we can then utilise to control said phenomenon. The problem is that models are not the real thing, they're just (hopefully) useful fictions that abstract away unimportant details to focus in on the important ones in a given context. This abstraction introduces uncertainty in the model itself, so we hope to assess its fit to data and hence embark on a process of parameter estimation that is, in some sense, optimal. Of course, the data is imperfectly measured too, so another source of uncertainty creeps in, and it's all well and good to agree with me that the models and the data are uncertain, but it would be far more useful if we could somehow quantify the uncertainty and the contributions from different sources, and how these uncertainties propagate through model runs and into the outputs. If we could do that, we could start to find ways to control the degree of uncertainty entering into the whole process and hopefuly improve our modelling and predictive capacity. 
+
+## Bayesian inverse problems
+One of the schools of probability theory is the Bayesian school. Now while classical probability centres on probability as a long-run frequency, Bayesian are more inclined to view probability as a means of encoding uncertainties. A Bayesian perspective, then, is likely to be a useful one when it comes to quantifying uncertainties in inverse problems using probabilistic uncertainty models.
+
+Consider a mathematical model $M$ of an experiment to be a set of theoretically or empirically informed equations that relate inputs $u$ (physical variables that can be manipulated prior to experimentation) to outputs $y$ (measurable quantities that in some sense vary in response to the manipulations of the inputs). Mathematicians distinguish between two broad kinds of problems in this context: _forward problems_ and _inverse problems_. The forward problem uses model $M$ to predict the outputs $y$ of an experiment given its inputs $u$, while the inverse problem uses the model $M$, given measurements of the outputs $y$ (i.e. data), to make inferences about the model inputs $u$ (parameter estimation). 
+
+Mathematicians also distinguish between so-called _well-posed_ and _ill-posed_ problems and although there are today a number of different conceptions of the conditions that constitute ill-posedness and well-posedness (see, for example [Hofmann & Plato (2018)](https://arxiv.org/pdf/1709.01109.pdf). Probably the original conception of a well-posed problem is due to the French mathematician Jacques Hadamard (1923), who considered that all mathematical problems pertaining to physical or technological realities ought to satisfy well-posedness conditions: existence, uniqueness and continuous dependence of the solution on the data. Problems are ill-posed (in the sense of Hadamard) if they fail to satisfy any one or more of these criteria (see the survey paper by [Kabanikhin (2008)](http://math.nsc.ru/LBRT/u2/Survey%20paper.pdf) and the still informative paper by [O'Sullivan (1986)](https://projecteuclid.org/euclid.ss/1177013525) for a more detailed discussion on the specifics of what these conditions entail). Without getting bogged down in the details, the take-home message is that inverse problems often are Hadamard ill-posed by virtue of noisy data and an imperfect model, and whenever we're faced with such problems, it's important to quantify the uncertainty inherent in any inferences and predictions that we make as part of our attempts at solving the inverse problem. Usually, to solve ill-posed problems some kind of additional information needs to be added to the scenario in the form of assumptions that lead to a well-defined solution space --- a process called regularization. Adopting a Bayesian approach to inverse problems allows us to quantify uncertainty in a logical, consistent and principled way that is capable of simultaneously regularizing any ill-posedness because the Bayesian approach always requires the incorporation of additional background information encoded as prior probability distribution on the parameters (i.e. essentially a restriction to the solution space). 
+
+Let's consider the Bayesian approach in more depth. Take the input-output pair $(u,y)$ to be a random variable distributed according to a joint probability distribution $L(u,y)$. Then a solution to the inverse problem would consist of the conditional distribution of the inputs $u$ given the outputs $y$, say $\pi(u|y)$, where we treat $u|y$ to be a conditional random variable. Then, by Bayes' theorem, we can write:
+\[
+\pi(u|y) \propto L(y|u)\pi_0(u).
+\]
+Here we have had to add into the mix some additional background (or prior) information about the inputs $u$ through the _prior_ distribution $\pi_0(u)$. The probability distribution $L(y|u)$ is called the data _likelihood_ and it encodes how likely the observed data $y$ is for given inputs $u$. The probability distribution of $u|y$, namely $p(u|y)$, is called the  _posterior_  and encodes what we know about the unknown $u$ conditional on the (known) data $y$. Bayes' theorem explicitly says that the posterior distribution (i.e. our solution to the inverse problem) is equal to the likelihood multiplied by the prior, up to a normalizing constant. In the context of inverse problems, the prior encodes our present state of knowledge about the inputs in the input space and the model $M$ defines the likelihood. Then observed data $y$ is used to add new information into the mix so we can update our prior knowledge about the inputs, and this updated knowledge is encoded in the posterior. This updating of knowledge impacts the degree of uncertainty about a quantity of interest $q$. Without data, we can estimate/predict our uncertainty about $q$ using the prior distribution. With data, we can make a more refined estimate/predicition of the uncertainty about $q$ from the relevant aspects of the posterior. The strong advantage of the Bayesian approach is the ease (in principle) with which we can encode our uncertainty about a quantity of interest and then bring data to bear on the situation in order to reduce the uncertainty in our predictions about $q$. Everything in a Bayesian approach is uncertain, so uncertainty quantification via probability distributions is a natural artefact of this approach.   
+
+## A note of caution
+
+The statement of Bayes' theorem is deceptively simple. In real-world inverse problems, there is a lot lurking within that simple looking statement. Iglesias and Stuart (2014) give the example the use of carbon capture and storage to facilitate global mitigation of the greenhouse effect, where interest is in assessing the economic viability and environmental impact of injecting carbon dioxide into Earth's subsurface - for example, using a depleted oil or gas field as a carbon dioxide storage site. This example is based on a paper by Chadwick (2011) with the catchy title of _"Between a rock and a hard place?"_ The mathematical model in this case consists of a suite of partial differential equations (PDEs) describing the $\text{CO}_2$ plume injected into the subsurface reservoir. Inputs to the model include parameters governing geological features such as the presence of faults and fractures and the permeability of the storage site, Outputs comprise the measurements of bottom-hole pressure from the injection well and other remotely-sensed satellite data such as measures of surface deformation. The key point is that the subsurface is not directly observable, so we have to infer its properties (inputs) with measurements (outputs) --- an inverse problem. 
+
+The ability to make those inferences accurately and to quantify our uncertainty about them, will enable decisions to be made on the basis of a variety of quantities of interest surrounding the economic viability and environmental impact of such a strategy, but the practical complexity inherent to the use of  Bayes' theorem here is not immediately obvious when we just write down the theorem as stated earlier: $\pi(u|y) \propto L(y|u)\pi_0(u)$. For a start, the likelihood is defined through solution of the forward model comprised of a suite of coupled PDEs (conservation laws) that describe multi-phase flow in a porous medium. If that's not dautning enough, the probability distribution on the input space is defined over a space of functions (read as very high-dimensional probability space). To update our knowledge and access the posterior, we need to be able to solve complex partial differential equations over a dauntingly high-dimensional input space. This is typical of inverse problems in a wide range of applications. 
+
+## What does this mean practically?
+
+*  In terms of modelling: application specific; concerned with the choice of prior for the unknown
+* In terms of computation: concerns ways to get at the joint posterior distribution with reasonable accuracy to be able to compute the posterior probability distributions of the quantities of interest in reasonable computing time. The flexible MCMC methods are a natural methodology for sampling the posterior distribution, but they are practically hampered by their $N^{-\frac{1}{2}}$ convergence rate, which gives rise to excessive computational complexity (cost per unit error); multi-level Monte Carlo and quasi-Monte Carlow methods look promising; as do methods based on generalized polynomial chaos. 
+
+## Further reading
+
+For more on the capabilities and limitations of MCMC and improved Monte Carlo methods, see:
+
+*  [R. Caflisch, _Monte Carlo and quasi-Monte Carlo methods_, Acta Numer., 7 (1998), 1-49.](https://www.math.ucla.edu/~caflisch/Pubs/Pubs1995-1999/actaNumerica1998.pdf) 
+*  [S. Cotter, G. Roberts, A.M. Stuart, and D. White, _MCMC methods for functions: Modifying old algorithms to make them faster_, Stat. Sci., 28 (2013), 424-446.](https://arxiv.org/abs/1202.0709)
+*  [M. Giles, _Multilevel Monte Carlo path simulation_, Oper. Res., 56 (2008), 607–617](https://people.maths.ox.ac.uk/gilesm/files/OPRE_2008.pdf) 
+
+For more on generalized polynomial chaos and related methods, see:
+
+*  [I. Babuska, R. Tempone, and G. Zouraris, _Galerkin finite element approximations of stochastic elliptic partial differential
+equations_, SIAM J. Numer. Anal., 42 (2004), 800–825](https://www.researchgate.net/publication/220179440_Galerkin_Finite_Element_Approximations_of_Stochastic_Elliptic_Partial_Differential_Equations)
+*  [C. Schwab and A.M. Stuart, _Sparse deterministic approximation of Bayesian inverse problems_, Inverse Problems, 28 (2012)](https://arxiv.org/abs/1103.4522).
+
+For more on statistical approaches to inverse problems, see:
+
+*  [A.M. Stuart, Inverse problems: A Bayesian perspective, Acta Numer., 19 (2010), 451–559.](https://homepages.warwick.ac.uk/~masdr/BOOKCHAPTERS/stuart15c.pdf)
+* [J. Kaipio and E. Somersalo, Statistical and Computational Inverse Problems, 160, Applied Mathematical Sciences, SpringerVerlag, New York, 2005](https://www.springer.com/gp/book/9780387220734)
+
