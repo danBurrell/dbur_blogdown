@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bayesian inverse problems on Dandelbrot</title>
+    <link>/topics/bayesian-inverse-problems/</link>
+    <description>Recent content in Bayesian inverse problems on Dandelbrot</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2016. All rights reserved.</copyright>
+    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/topics/bayesian-inverse-problems/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Inverse Problems and Uncertainty Quantification</title>
+      <link>/post/inverse-problems-and-uncertainty-quantification/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/inverse-problems-and-uncertainty-quantification/</guid>
+      <description>I’m interested in uncertainty quantification. There is a brief article in SIAM NEWS from 2014 which I just read that has piqued my interest further. The article, authored by Marco Iglesias and Andrew Stuart, discusses uncertainty quantification (UQ) in the context of inverse problems from a Bayesian perspective. Let’s have a look at the basic ideas set out in the article to get a feel for this important and “exciting area of research in the mathematical sciences” that brings together skills and knowledge from “analysis, computation, probability, and statistics.</description>
+    </item>
+    
+  </channel>
+</rss>

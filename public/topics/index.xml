@@ -7,9 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2016. All rights reserved.</copyright>
+    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/topics/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Bayesian inverse problems</title>
+      <link>/topics/bayesian-inverse-problems/</link>
+      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/topics/bayesian-inverse-problems/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

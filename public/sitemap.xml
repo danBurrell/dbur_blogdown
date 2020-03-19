@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>/topics/bayesian-inverse-problems/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/tags/inverse-problems/</loc>
     <lastmod>2020-03-19T00:00:00+00:00</lastmod>
   </url>
@@ -24,6 +29,11 @@
   
   <url>
     <loc>/tags/</loc>
+    <lastmod>2020-03-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/topics/</loc>
     <lastmod>2020-03-19T00:00:00+00:00</lastmod>
   </url>
   
@@ -60,10 +70,6 @@
   <url>
     <loc>/contact/</loc>
     <lastmod>2014-04-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/topics/</loc>
   </url>
   
 </urlset>

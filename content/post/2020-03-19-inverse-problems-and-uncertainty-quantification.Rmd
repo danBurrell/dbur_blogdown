@@ -14,8 +14,8 @@ tags:
   - VVUQ
   - Bayesian
   - Inverse Problems
-description: ''
-topics: []
+description: 'A post to reiew a paper by Iglesias & Stuart (2014)'
+topics: [Bayesian inverse problems]
 ---
 
 I'm interested in uncertainty quantification. There is a brief article in [SIAM NEWS from 2014](https://www.maths.nottingham.ac.uk/plp/pmzmi/siam.pdf) which I just read that has piqued my interest further. The article, authored by Marco Iglesias and Andrew Stuart, discusses uncertainty quantification (UQ) in the context of inverse problems from a Bayesian perspective. Let's have a look at the basic ideas set out in the article to get a feel for this important and "exciting area of research in the mathematical sciences" that brings together skills and knowledge from "analysis, computation, probability, and statistics."
