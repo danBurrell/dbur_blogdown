@@ -292,13 +292,15 @@
 }</code></pre>
 <p>Running this function with all the arguments as set (note that these differ somewhat to the arguments in the original) leads to the following:</p>
 <pre class="r"><code>mandelbrot_generator(p=2, q=1)</code></pre>
-<p><img src="/post/2020-03-18-the-mandelbrot-set-in-r_files/figure-html/unnamed-chunk-2-1.png" width="672" />
-This is the code I used to create the logo for Dandelbrot.com. I find fractal geometry hugely pleasing. I love dynamical systems and the idea that such simple iterative functions can produce such complex and intricate behaviour. The Mandelbrot set is just a commonly known embodiment of this. I urge you to play around with the code and see what else you can come up with. For example, what adjustments to the basic iterative equation can you make, and how does it impact the result? Below, I have tweaked the original <code>mandelbrot_generator()</code> function to enable general powers:
+<p><img src="/post/2020-03-18-the-mandelbrot-set-in-r_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>This is the code I used to create the logo for Dandelbrot.com. I find fractal geometry hugely pleasing. I love dynamical systems and the idea that such simple iterative functions can produce such complex and intricate behaviour. The Mandelbrot set is just a commonly known embodiment of this. I urge you to play around with the code and see what else you can come up with. For example, what adjustments to the basic iterative equation can you make, and how does it impact the result? Below, I have tweaked the original <code>mandelbrot_generator()</code> function to enable general powers:
 <span class="math display">\[
 z_{n+1} = z_n^p + c^q.
 \]</span>
 When <span class="math inline">\(p=4\)</span> and <span class="math inline">\(q=0.5\)</span> and the necessary adjustments to the plotting window are made, the following image is generated:</p>
-<pre class="r"><code>mandelbrot_generator(p=4, q=0.5, xmin = -2.8, xmax = 2, ymin = -2.5, ymax = 2.5, nx=1000, ny=1000, n=75)</code></pre>
+<pre class="r"><code>mandelbrot_generator(p=4, q=0.5, xmin = -2.8, xmax = 2, 
+                     ymin = -2.5, ymax = 2.5, nx=1000, ny=1000, n=25,
+                     cols = colorRampPalette(c(&quot;black&quot;,&quot;yellow&quot;,&quot;orangered&quot;,&quot;purple&quot;))(11))</code></pre>
 <p><img src="/post/2020-03-18-the-mandelbrot-set-in-r_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 <p>This is a very simple tweak, but I imagine with some thought and creativity, some really interesting things might crop up. Also, please contact me if you’ve played with R for generating other fractal objects, dynamical systems and chaotic systems and the likes. I’d be interested to see what other people have come up with.</p>
 </div>

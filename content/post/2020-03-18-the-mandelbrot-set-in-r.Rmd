@@ -61,13 +61,16 @@ Running this function with all the arguments as set (note that these differ some
 ```{r}
 mandelbrot_generator(p=2, q=1)
 ```
+
 This is the code I used to create the logo for Dandelbrot.com. I find fractal geometry hugely pleasing. I love dynamical systems and the idea that such simple iterative functions can produce such complex and intricate behaviour. The Mandelbrot set is just a commonly known embodiment of this. I urge you to play around with the code and see what else you can come up with. For example, what adjustments to the basic iterative equation can you make, and how does it impact the result? Below, I have tweaked the original `mandelbrot_generator()` function to enable general powers:
 \[
 z_{n+1} = z_n^p + c^q.
 \]
 When $p=4$ and $q=0.5$ and the necessary adjustments to the plotting window are made, the following image is generated:
 ```{r}
-mandelbrot_generator(p=4, q=0.5, xmin = -2.8, xmax = 2, ymin = -2.5, ymax = 2.5, nx=1000, ny=1000, n=75)
+mandelbrot_generator(p=4, q=0.5, xmin = -2.8, xmax = 2, 
+                     ymin = -2.5, ymax = 2.5, nx=1000, ny=1000, n=25,
+                     cols = colorRampPalette(c("black","yellow","orangered","purple"))(11))
 ```
 
 This is a very simple tweak, but I imagine with some thought and creativity, some really interesting things might crop up. Also, please contact me if you've played with R for generating other fractal objects, dynamical systems and chaotic systems and the likes. I'd be interested to see what other people have come up with.   
