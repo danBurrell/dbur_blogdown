@@ -1,0 +1,476 @@
+---
+title: A single factor CRD and the one-way analysis of variance
+author: Daniel Burrell
+date: '2020-03-19'
+slug: a-single-factor-crd-and-the-one-way-analysis-of-variance
+categories:
+  - R
+  - analysis of variance
+  - design of experiments
+  - completely randomised design
+tags:
+  - CRD
+  - ANOVA
+  - DOE
+description: ''
+topics: []
+---
+
+I'm currently teaching a class on the statistical design of experiments, and we're using SPSS as the statistical software to implement basic analyses of data from designed experiments at the moment. Shortly we'd like to switch to using R as the main statistical computing package. I also have a client who has asked me to teach her how to use R to perform basic one-way and two-way analysis of variance for data arising from completely randomised designs with single factor and 2-factorial treatment structures, respectively. This is child's play, especially in R, but I thought I'd take the opportunity to work through a simple example for future use.
+
+## What is the one-way ANOVA test
+
+The __one-way analysis of variance (ANOVA)__ extends the two independent samples t-test to the case where there are more than two independent samples or groups to be compared. In a __one-way ANOVA__ the data is organised into groups based on a single grouping variable, which is called, in the language of experimental design, a __factor__. For this reason the one-way ANOVA is sometimes referred to as a _one-factor_ or _single-factor ANOVA_. The groups usually correspond to different treatment conditions. The single factor is often referred to as the __treatment__ or __treatment factor__ and the different treatment conditions are referred to as its __levels__. 
+
+Let's introduce some notation. Suppose we have a treatment factor with $T$ levels corresponding to $T$ distinct treatment conditions applied to $N$ experimental units in a completely randomised fashion such that each of the treatment conditions gets assigned to $r_i$ experimental units, where 
+\[
+\sum_{i=1}^T r_i = N.
+\]
+The value $r_j$ is the sample size of the $j$th treatment group, and is called it number of replicates. The optimal choice (with respect to statistical power) of the $r_j$ for all $j$ actually depends on the research question, but for the case where $r_1 = r_2 = \cdots = r_T = r$ (i.e. each treatment group has an equal number of replicates, or all the treatment groups have the same sample size), the design is said to be __balanced__. 
+
+The goal of the ANOVA is to compare the impacts of $T>2$ treatments on some response measurement. We do this by formulating a parametric model for our data. The classical model is called the __cell means model__.  Let $Y_{ij}$ denote the $j$th replicate observation in treatment group $i$, where $i = 1,\ldots,T$ and $j=1,\ldots, r_i$. In the __cell means model__ we allow each treatment group to have its own _expected value_ but we assume that the observations are independent and fluctuate around this value according to a normal distribution, i.e.,
+\[
+Y_{ij} \sim N(\mu_i, \sigma^2),\quad \text{independent}
+\]
+where
+
+* $\mu_i = \mathbb E[Y_{ij}]$, the expected value of the response random variable for treatment group $i$
+* $\sigma^2 = \mathbb V[Y_{ij}]$, the variance of response random variable, which is assumed to be homogenous or constant across all treatment groups.
+
+The above can be re-written as
+\[
+Y_{ij} = \mu_i + \epsilon_{ij},
+\]
+with (random) _errors_ $\epsilon_{ij} \sim N(0, \sigma^2)$ by simply partitioning the $N(\mu_i, \sigma^2)$ distribution into a deterministic part $\mu_i$ and a stochastic part $\epsilon_{ij}$ fluctuating around _zero_. This clearly links to a simple linear regression, with $Y$ being the __response__ and the treatment factor encoding the grouping information being a categorical __predictor__. The one-way ANOVA is nothing more than a regression model with a categorical predictor and normally distributed errors. 
+
+The categorical predictor or factor can be either unordered (__nominal__) or ordered (__ordinal__). For example, south-east Queensland wheat variety would be an unordered (nominal) factor  (e.g. with levels "Strzlecki", "EGA Wylie" and "Baxter"). There is no sense of ordering between these different varieties. Glyphosate concentration could be an ordered (ordinal) factor (e.g. with ordered levels "1 percent solution", "2 percent solution", "5 percent solution" and "10 percent solution"). There is clearly an order relation on the levels of Glyphosate concentration; we expect $1\% < 2\% < 5\% < 10\%$ in terms of the impact of the glyphosate as a herbicide.  
+
+It's also possible to further re-write the deterministic part as
+\[
+\mu_i = \mu + \alpha_i, \quad (i=1,\ldots,T)
+\]
+to obtain a model structure of the form
+\[
+Y_{ij} = \mu+\alpha_i+\epsilon_{ij},
+\]
+again with $\epsilon_{ij} \sim N(0, \sigma^2)$
+
+This is the __effects model__ where $\alpha_i$ is the $i$th __treatment effect__. Think of $\mu$ as a "global mean" and $\alpha_i$ as a "deviation from the global mean due to the effect of the $i$th treatment". Actually, this interpretation is not always correct, but it is helpful. 
+
+Let's look more closely at the parameters of these two models (cell means and effects models). The cell means model requires us to estimate $\mu_1, \ldots,\mu_T$ and $\sigma^2$ for a total of $T+1$ parameters. But the effects model requires us to estimate $\mu$, $\alpha_1,\ldots,\alpha_T$ and $\sigma^2$ for a total of $T+2$ parameters. The addition of the extra parameter in the effects model renders it __non-identifiable__ (because we have $T+2$ parameters and only $T+1$ independent bits of information with which to model them. In other words, we are free to "shift around" effects between $\mu$ and the $\alpha_i$'s without altering the resulting values of $\mu_i$. For example, we are free to add a constant to $\mu$, say $\mu + c$ and then adjust the $\alpha_i$'s by subtracting the same constant, $\alpha_i - c$, and this will lead to the same value of $\mu_i$ for each $i$. Because of this non-identifiability problem, we need to impose a constraint on the $\alpha_i$'s that effectively "removes" the additional parameter and restores identifiability. Some of the commonly adopted constraints are:
+
+* sum-to-zero constraint: $\sum_{i=1}^T \alpha_i = 0$ leading to the interpretation that $\mu = \frac{1}{T} \sum_{i=1}^T \mu_i$ (NB. In R this corresponds to the `contr.sum` method).
+* weighted sum-to-zero constraint: $\sum_{i=1}^T r_i\alpha_i = 0$ leading to the interpretation that $\mu = \frac{1}{N} \sum_{i=1}^T r_i\mu_i$.
+* reference group constraint: $\alpha_1 = 0$ leading to the interpretation that $\mu = \mu_1$ (NB. In R this corresponds to the default `contr.treatment` method).
+
+Only $T-1$ elements of the treatment effects are allowed to freely vary. If we know $T-1$ of the $\alpha_i$ values, then we automatically know the remaining $\alpha_i$ value. This fact is encoded in the treatment __degrees of freedom (df)__: we say that the treatment effects has $T-1$ degrees of freedom. 
+
+Without going into full details, we may estimate the parameters of the model using the __least squares criterion__ which minimizes the squared deviation from the observed data $y_{ij}$ to the model values $\mu+\alpha_i$, i.e., for the cell means model:
+\[
+\hat\mu_i = \arg\min_\mu_i \sum_{i=1}^T\sum_{j=1}^{r_i} (y_{ij} - \mu_i)^2,
+\]
+and for the effects model:
+\[
+\hat\mu,\hat\alpha_i = \arg\min_{\mu,\alpha} \sum_{i=1}^T\sum_{j=1}^{r_i} (y_{ij} - \mu - \alpha_i)^2.
+\]
+
+We use the following notation:
+
+* sum of group $i$: $y_{i\cdot}=\sum_{j=1}^{r_i} y_{ij}$
+* sum of all observations: $y_{\cdot\cdot}=\sum_{i=1}^T\sum_{j=1}^{r_i} y_{ij}$
+* mean of group $i$: $\bar y_{i\cdot}=\frac{1}{r_i}\sum_{j=1}^{r_i} y_{ij}$
+* overall (total/grand/global) mean: $\bar y_{\cdot\cdot}=\frac{1}{N}\sum_{i=1}^T\sum_{j=1}^{r_i} y_{ij}$
+
+As we can independently estimate the values of the different group means, we get that $\hat \mu_i = \bar y_{i\cdot}$, so that:
+\[
+\hat \mu_i = \hat \mu + \hat \alpha_i = \bar y_i.
+\]
+
+
+## Assumptions of ANOVA test
+
+## How one-way ANOVA test works
+
+## Before you do a formal analysis ...
+
+### Get the data into R
+
+One of my roles at the institution where I work is as a consultant to a research centre that focuses on phytopathology and plant epidemiology in the context of agricultural crops. A portion of the researchers I work with concentrate on studying the impacts of microscopic worms called nematodes on different aspects of plant health. With that in mind, I'm going to construct an artificial example in the guise of a nematode study. 
+
+Suppose that a phytopathologist is interested in studying the impacts of different population densities of a certain nematode species on the growth of tomato seedlings. In consultation with their biometrician they decide on a completely randomised design in which they will introduce 4 levels of population density of the nematodes into 16 pots to be planted with the same type of tomato seed, so that in the end each level of nematode population density is assigned at random to 4 pots. 
+
+### Do some basic pre-analysis checks
+
+### Visualise the data
+
+## Perform the one-way ANOVA test
+
+## Do some basic post-analysis checks of ANOVA assumptions
+
+### Check the assumption of homogeneity of variance
+
+### Check the normality assumption
+
+
+## Interpret the result of the one-way ANOVA tests
+
+## Planned contrasts and post-hoc multiple comparisons
+
+## What to do if the ANOVA assumptions are not valid
+
+
+
+
+
+
+
+Here we have $N=16$ experimental units, $K=4$ treatment groups (population densities) and $r=4$ replicates of each treatment. The response variable $y_{ij}$ is the increase in height of the tomato seedlings (measured in centimetres) 16 days after planting. The four levels of population density are fixed at $0$ nematodes, $1000$ nematodes, $5000$ and $10000$ nematodes. data are as follows:
+
+
+```{r}
+if(!require(pacman)){ install.packages("pacman")}
+pacman::p_load(tidyverse, knitr, kableExtra)
+```
+
+```{r, include=FALSE}
+my_data <- tibble(
+  nematode_density = c(0, 1000, 5000, 10000) %>% 
+    rep(each=4) %>%
+    ordered(),
+  seedling_growth = c(10.8, 9.1, 13.5, 9.2, 
+                      11.1, 11.1, 8.2, 11.3,
+                       5.4, 4.6, 7.4, 5.0,
+                       5.8, 5.3, 3.2, 7.5 )
+)
+```
+```{r, echo=FALSE}
+my_data %>% 
+  kable() %>%
+  kable_styling(bootstrap_options = "condensed", position = "float_right") %>%
+  scroll_box(width="300px", height="250px")
+```
+
+
+
+
+## The simplest statistical set-up comprises a single factor treatment structure and a completely randomised design structure.
+
+In general, we will have $N$ experimental units available to us and we will want to contrast $K$ treatments. For a completely randomized design (CRD) we first select sample sizes (the number of replicates of each treatment) $n_1, n_2, \ldots, n_k$ such that $N = \sum_{k=1}^K n_k$, and then we randomly assign $n_1$ of the $N$ units to recieve treatment 1, $n_2$  of the remaining $N-n_1$ units to recieve treatment 2, and so on. In this way all possible arrangements of the $N$ units into $K$ groups with sizes $n_1$ through to $n_K$ are equally likely.^[Note that complete randomization only addresses the random assignment of treatments to experimental units; it says nothing about the selection of treatments, experimental units, and responses, all of which are required tasks in the process of experimentation.]
+
+The CRD design structure is the simplest of all the analysis of variance type designs. It is easy to understand and easy to analyse. As a rule in statistical practice, we seek simplicity over complexity, only adding in more complexity if it is justified. In the context of the design of experiments, this means that a CRD with a single factor treatment structure is usually our first port of call. We only graduate to factorial treatment structures, or blocked design structures and other additions of complexity if they are necessary to meet the experiment criteria.  
+
+# Models and parameters
+
+In some sense a statistical _model_ for data is a specification of the a statistical distribution from which we believe it is feasible that data could have been generated. In a simple coin toss experiment, where a fair coin is tossed 10 times and we're interested in predicting the number of heads that turn up in those 10 tosses, we might model the data as being generated by a Binomial(n, p) distribution, where $n=10$ is the number of independent Bernoulli trials, and $p=0.5$ is the number of successes (here defined to be tossing the coin and having heads turn up). The statistical model is a binomial probability distribution, and the specific characteristics of that distribution depend on two parameters: the success probability $p$ and the number of trials $n$. In this case, we know the value of both parameters, but in experimental scenarios we don't. Instead, we usually posit several different models of the data, all with unknown parameters, and we seek to use sample data to both make inferences about the parameters of the models (parameter estimation), and decide which of the models provides the best description of the data (model selection). 
+
+Usually our models for experimental data consist of two basic parts: a model to describe the means or expected values of the data (a "model for the means" or a "structure for the means"); and a model to describe how the data vary around the treatment means (a "model for the errors" or a "structure for the errors"). Typically for experimental data we begin by positing two distinct structures for the mean, namely the null structure which says that all treatments have the same mean response, and the alternative structure, which posits that each treatment has its own mean. 
+
+
+
+
+
+
+
+
+Use the function `agricolae::design.crd()` to produce the design. This function takes arguments as follows:
+
+* `trt` is a character vector specifying the names of the levels of the treatment factor,
+* `r` is an integer number of replicates, or a vector specifying different numbers of replicates for each factor level in the case of an unbalanced design,
+* `serie` specifies the approach to numbering plots; `1` gives double digit numbering (11, 12, etc.), `2` gives triple digit numbering (101, 102, etc.) and `3` gives quadruple digit numbering (1001, 1002, etc.); the default is `2`.
+* `seed` specifies the seed for the random number generator; the default is `0`,
+* `kinds` specifies the random number generator and takes values `"Wichmann-Hill"`, `"Marsaglia-Multicarry"`, `"Super-Duper"`, `"Mersenne-Twister"`, `"Knuth-TAOCP"`, `"user-supplied"`, `"Knuth-TAOCP-2002"` and  `"default"` (which is the default for R, not the default for the function); the default for the function is `"Super-Duper"`,
+* `randomization` a logical value specifying whether to randomise of not; the default is `TRUE`. 
+
+The function returns design parameters in `parameters` and the fieldbook in `book`. Let's use this function now, to generate a design for the fiber tensile strength experiment. First load some useful packages, including `agricolae`. 
+
+```{r}
+# Load agricolae package
+if(!require(pacman)) {install.packages("pacman")}
+pacman::p_load(xlsx, tibble, dplyr, agricolae, magrittr, install=TRUE, update=FALSE)
+```
+Now, specify the parameters to pass to `agricolae::design.crd()`. 
+```{r}
+# Specify design parameters to pass to agricolae::design.crd()
+fac_levels <- c("15%", "20%", "25%", "30%", "35%")
+rep_num <- 5
+plot_num <- 3
+start_seed <- 29680
+rand_gen <- "Mersenne-Twister"
+```
+Now produce the design:
+```{r}
+# Call agricolae::design.crd
+d <- design.crd(
+  trt = fac_levels,
+  r = rep_num,
+  serie = plot_num,
+  seed = start_seed,
+  kinds = rand_gen,
+  randomization = TRUE)
+```
+The output we're most interested in is the design fieldbook, which we'll tidy up a bit using `dplyr::transmute()`. To check that everything looks ok, display the first 5 cases using the function `head()`:
+```{r}
+crd_fieldbook <- d$book %>%
+  dplyr::transmute(
+    exp_unit = d$book$plots,
+    test_seq = seq(1:length(d$book$plots)),
+    rep_num = d$book$r,
+    treatment = d$book$fac_levels
+  )
+
+head(crd_fieldbook, n=5)
+```
+We can also export this fieldbook to an Excel spreadsheet, using the `write.xlsx()` function from the package `xlsx`. Here we store the fieldbook in a sheet called `"crd_fieldbook"`. 
+```{r}
+write.xlsx(
+  x = crd_fieldbook,
+  file = "C:/myWork/dbur_blogdown/Misc/crd_out.xlsx",
+  sheetName = "crd_fieldbook",
+  col.names = TRUE,
+  row.names = FALSE, 
+  append = FALSE
+)
+```
+ 
+Suppose that you run the experiment according to the fieldbook run order and record the results in an adjacent column. The measured results are the pressure applied at failure (pounds per square inch). The data from this experiment are recorded in the Excel spreadsheet alongside the fieldbook.  
+```{r, include=FALSE}
+fts_data <- tibble(
+  grp = as.factor(rep(fac_levels, each=5)),
+  y = c(7, 7, 15, 11, 9, 
+        12, 17, 12, 18, 18, 
+        14, 18, 18, 19, 19, 
+        19, 25, 22, 19, 23, 
+        7, 10, 11, 15, 11)
+)
+
+crd_data <- crd_fieldbook
+for (t in levels(fts_data$grp) ){
+  crd_data$y[crd_data$treatment == t] <- fts_data$y[fts_data$grp == t]
+}
+
+write.xlsx(
+  x = crd_data,
+  file = "C:/myWork/dbur_blogdown/Misc/crd_out.xlsx",
+  sheetName = "crd_results",
+  col.names = TRUE,
+  row.names = FALSE, 
+  append = TRUE
+)
+```
+The observed data in this case is shown in the following table:
+```{r}
+print(crd_data)
+```
+Let's now examine the data graphically using the package `ggstatsplot` package, which is built on `ggplot2` and provides information -rich visualisations of data, including important statistical information. 
+
+```{r}
+pacman::p_load(ggstatsplot)
+
+p1 <- ggstatsplot::ggbetweenstats(
+  data = crd_data,
+  x = treatment,
+  y = y,
+  plot.type = "violin",
+  type = "parametic",
+  pairwise.comparisons = TRUE,
+  effsize.type = "partial_eta",
+  partial = TRUE,
+  effsize.noncentral = TRUE,
+  results.subtitle = TRUE,
+  xlab = "Cotton percentage",
+  ylab = "Tensile strength (psi)",
+  title = "Pairwise comparisons of means",
+  sample.size.label = FALSE,
+  var.equal = FALSE,
+  nboot = 1000,
+  mean.plotting = TRUE,
+  bf.message = FALSE,
+  messages = FALSE
+)
+p1
+```
+
+It is clear from the graph that tensile strength increases as cotton content increases, up to about 30 percent cotton, and then sharply decreases between 30 and 35 percent cotton. The variability between groups appears to be relatively homogenous. We can already be reasonably confident that cotton content really does influence tensile strength and that the maximum strength occurs at around $30\%$ cotton. To gain definitive evidence on which to base our decisions, we should use the analysis of variance procedure to test for the equality of the means of the five treatment groups.
+
+## The analysis of variance
+Our aim is to compare the sample means of the response variable (tensile strength) between the different treatment groups (specified by the level of cotton content). In general we let $y_{ij}$ represent the $j$th observation taken under treatment $i$, where there are $n$ observations under each treatment, and $a$ different treatments. An analysis of variance tests the null hypothesis:
+\[
+  H_0: \mu_1 = \mu_2 =\ldots=\mu_a
+\]
+against the alternative hypothesis:
+\[
+  H_1: \text{At least one of the means differs signficantly from the others.} 
+\]
+
+In a general single-factor (or one-way) analysis of variance (ANOVA), we model the observed data  by a linear statistical model of the form: 
+\[
+\begin{aligned}
+  y_{ij} &= \text{deterministic component} + \text{random component} \\
+  &= \mu_i + \varepsilon_{ij} \quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n) \quad \text{[treatment means model]}\\
+  &= \mu + \tau_i + \varepsilon_{ij}\quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n) \quad \text{[treatment effects model]}\\
+\end{aligned}
+\]
+In the above, we distinguish between two equivalent models, namely the treatment means model and the treatment effects model. In the former the mean response under the $i$th treatment is $\mu_i$ whereas in the latter model we have $\mu_i = \mu + \tau_i$ to indicate a common mean response $\mu$ across all treatment groups and additionally the effect of the $i$th treatment. It is assumed that $\varepsilon_{ij} \sim \text{iid.}\, N(0,\sigma^2)$. 
+
+Using the treatment effects model, our hypotheses are modified to assessing a null hypothesis of no difference in effects:
+\[
+  H_0: \tau_1 = \tau_2 =\ldots=\tau_a
+\]
+against an alternative that at least one treatment effect differs significantly from the others:
+\[
+  H_1: \text{At least one of the effects differs signficantly from the others.} 
+\]
+
+The model is called the __single factor ANOVA__ or the __one-way ANOVA__ because we're dealing with just one treatment factor that encodes the group structure by which replicates of each treatment are applied randomly to the whole set of experimental units. Because there are no restrictions to how treatments are randomly allocated to experimental units, they're just allocated to the whole set of $N = an$ units in the sample, this is called a __Completely Randomized Design__.   
+
+### A note on fixed versus random effects
+It is important to realise that the model $y_{ij} = \mu + \tau_i + \varepsilon_{ij}$ can describe two different situations when it comes to the treatment effects. First, as is the case in the fiber tensile strength testing experiment, the $a$ levels of the treatment factor could have been chosen and fixed by the experimenter. In such a case, interest is in comparing the treatment means (or effects) and the conclusions apply only to the factor levles considered in the experiment. They cannot be extended to similar treatments (for example, we cannot say anything much about the response when fibers consist of $37\%$ or $40\%$ cotton because these specific treatment levels are not included in the experiment). The analysis will focus on estimating the model parameters $(\mu, \tau_{i=1:a}, \sigma^2)$. This is called a __fixed-effects model__. 
+
+An alternative case is where the particula treatments used constitute a random sample from a larger population of treatments. In such a case we are interested in extending our conclusions (which are based on a sample of treatments) to make inferences about all treatments in the population, whether they were considered in the experiment or not. Here the $\tau_i$ are not fixed values, but are random variables and interest is usually less centered on estimating means or effects of the particular ones chosen and more on estimating the variability of the $\tau_i$. This is called a __random-effects model__ or a __components of variance model__.  I'll do a post on random-effects models some other day, but in our example the fixed-effects model analysis is appropriate. 
+
+## Analysis of the fixed-effects model
+The fixed-effects model has the form:
+\[
+y_{ij} = \mu + \tau_i + \varepsilon_{ij}\quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n)
+\]
+where we have $a$ treatment effects and the overall mean to estimate. This is one additional parameter beyond what is identifiable computationally. A constraint needs to be imposed on the parameters in order to make the problem well-posed. Usually the treatment effects $\tau_i$ are considered to be deviations from the overall mean $\mu$, so it makes sense that some will add onto the mean and others will subtract from the mean. It is sensible to assume that the sum of the treatment effects will be zero, so we typically impose this __sum-to-zero__ constraint on the treatments effects:
+\[
+\sum_{i=1}^{a} \tau_i=0.
+\]
+
+Now, let's introduce some shorthand notation to help us set out the mathematics of the one-way ANOVA. We will use a __dot__ to indicate summation over an index, so that $y_{i\cdot}$ represents the sum of the $n$ replicate observations under the $i$th treatment (the treatment totals) and $\bar y_{i\cdot}$ is the sample average of those $n$ observations (the treatment means). That is:
+\[
+y_{i\cdot}=\sum_{j=1}^n y_{ij} \quad\text{and} \quad \bar y_{i\cdot} = \frac{y_{i\cdot}}{n} \quad (i=1,2,\ldots,a).
+\]
+Similarly, $y_{\cdot\cdot}$ is the sum over all the observations across all treatment groups (the grand total), and $\bar y_{\cdot\cdot}$ is the mean of all the observations across all treatment groups (the grand mean):
+\[
+y_{\cdot\cdot}=\sum_{i=1}^a y_{i\cdot} = \sum_{i=1}^a\sum_{j=1}^n y_{ij} \quad\text{and} \quad \bar y_{\cdot\cdot} = \frac{y_{\cdot\cdot}}{N} \quad (N=a\times n).
+\]
+The mean of the $i$th treatment is just the deterministic component of the model, as discussed previously:
+\[\mathbb{E}[y_{ij}] = \mu_i = \mu + \tau_i\] for $i = 1, 2,\ldots, a$. Note that under the null hypothesis of no treatment effect, the $\tau_i=0$ for all $i$ and the model reduces to:
+\[
+y_{ij} = \mu +\varepsilon_{ij},
+\]
+so that we can also think of significance testing as a model-comparison endevour (and this becomes natural down the track when we learn that these ANOVA-type models are examples of the broad class of general linear models, and that we can fit them using regression modelling techniques). 
+
+### Partitioning the total sum of squares
+The name __analysis of variance__ refers to the breaking apart (analysis) of the total variability (variance) in an experimental data set into component parts that can be attributed to (or explained by) either the random sampling variability, the treatments applied, or other local control factors (but this only enters into consideration when we start exercising local control through restricted randomisations in block designs). In the simple one-way analysis of variance for a completely randomised design, we are primarily concerned with partitioning the total variability into a component that is due to the applied treatments, and a component that's due to the random sampling variability (or random error).
+
+As has already been discussed, the hypotheses we're interested in testing are:
+\[
+\begin{aligned}
+  H_0 &: \tau_1 = \tau_2 =\ldots=\tau_a \\
+  H_1 &: \tau_i \neq 0 \quad \text{for at least one } i .
+\end{aligned}
+\]
+
+Now, it turns out that we can get at a formal test for this hypothesis by estimating the variance $\sigma^2$ and by capitalising on Cochran's theorem. Cochran's theorem says that the sum of $s$ independent chi-square random variables:
+\[  
+  \sum_{i=1}^s X_i
+\]
+with  $X_i\sim \chi^2_{\nu_i} \quad (i=1, 2, \ldots, s)$ is equal to the sum of $\nu > s$ independent standard normal random variables:
+\[
+  \sum_{k=1}^\nu Z_k,
+\]
+with $Z_k \sim NID(0, 1)$ and $v = \sum_{i=1}^s \nu_i$. 
+
+Let's look at the usual estimate of the variance $\sigma^2$, as follows: 
+\[
+ \hat\sigma^2 = \frac{1}{an - 1}\sum_{i=1}^a\sum_{j=1}^n (y_{ij} - \bar y_{\cdot\cdot})^2.
+\]
+Replacing $y_{ij}$ with the model $\mu + \tau_i +\varepsilon_{ij}$ we get:
+\[
+ \hat\sigma^2 = \frac{1}{an - 1}\sum_{i=1}^a\sum_{j=1}^n (\mu + \tau_i +\varepsilon_{ij} - \bar y_{\cdot\cdot})^2,
+\]
+which, with a little algebra gives rise to:
+\[
+ 
+\]
+
+
+
+
+One measure of the variability of a data set is given by the mean square error (MSE). We know that an estimate of the population mean and variance is given by the sample mean and sample variance, respectively:
+\[
+\bar y = \frac{1}{n}\sum_{k=1}^K y_k \quad\text{and} \quad s^2 = \frac{1}{n-1}\sum_{k=1}^K (y_k - \bar y)^2.
+\]
+Observe that the sum of squared deviations from the sample average forms a part of the equation for $s^2$. Indeed, we could express this __sum of squares__ as:
+\[
+(n-1)s^2 = \sum_{k=1}^K (y_k - \bar y)^2.
+\]
+In the context of the one-way ANOVA, this corresponds to computing the variability of the total data set without rehard for membership to a particular treatment group, viz. 
+\[
+SS_T = (an-1)s^2 = \sum_{i=1}^a\sum_{j=1}^n (y_{ij}-\bar y_{\cdot\cdot})^2.
+\]
+This is called the __total corrected sum of squares__, where the _corrected_ bit refers to the fact that we are adding together squares that consist of a deviation from the grand mean, so each observed value is being "corrected" for the grand mean. Clearly this $SS_T = (an-1)s^2$ implicitly contains a measure of the total variability (i.e. $s^2$). The idea of the one-way analysis of variance is to partition the total corrected sum of squares into a component that measures the variability _between_ treatment means with respect to the grand mean (a treatment sum of squares) and a component that measures the variability of observations _within_ a treatment with respect to that treatment's mean (which can only be due to random error). There's a "trick" to this that isn't immediately obvious --- one of the arithmetical magic tricks that I find myself constantly wishing someone, somewhere would stop reproducing blindly and actually explain where the insight comes from to do this. One day I hope to find out that insight, but for now, like all those others I'm just going to reproduce it faithfully. The trick is to do absolutely nothing to the equation by adding $\bar y_{i\cdot}$ and then subtracting $\bar y_{i\cdot}$ so that in effect merely $0$ has been added. Observe:
+\[
+\begin{aligned}
+SS_T &= \sum_{i=1}^a\sum_{j=1}^n (y_{ij}-\bar y_{\cdot\cdot} + \bar y_{i\cdot} - \bar y_{i\cdot})^2 \\
+ &= \sum_{i=1}^a\sum_{j=1}^n \big[(\bar y_{i\cdot} -\bar y_{\cdot\cdot}) + (y_{ij}  - \bar y_{i\cdot})\big]^2 \\
+ &= \sum_{i=1}^a\sum_{j=1}^n \big[(\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + (y_{ij}  - \bar y_{i\cdot})^2 + 2(\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot})\big] \\
+ &= \sum_{i=1}^a\sum_{j=1}^n (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n 2(\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) \\
+ &= n \sum_{i=1}^a (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2 + 2\sum_{i=1}^a\sum_{j=1}^n (\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) \\
+ &= n \sum_{i=1}^a (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2\\  &= SS_\text{Trt} + SS_{E}
+\end{aligned}
+\]
+Note that the cross-product term vanishes by equality with $0$, since it can be written as:
+\[
+\begin{aligned}
+  2\sum_{i=1}^a   \sum_{j=1}^n (\bar y_{i\cdot}-\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) &= 2\sum_{i=1}^a \bigg[(\bar y_{i\cdot}-\bar y_{\cdot\cdot}) \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot}) \bigg] \\
+  &= 2\sum_{i=1}^a \bigg[(\bar y_{i\cdot}-\bar y_{\cdot\cdot}) \bigg \{ \bigg(\sum_{j=1}^n y_{ij}\bigg) - n \bar y_{i\cdot}\bigg \}\bigg] \\
+\end{aligned}
+\]
+and the factor within the curly braces is identically zero:
+\[
+\begin{aligned}
+ \bigg(\sum_{j=1}^n y_{ij}\bigg) - n \bar y_{i\cdot} &= y_{i\cdot} - n \frac{y_{i\cdot}}{n} \\
+ &= y_{i\cdot} - y_{i\cdot} \\
+ &= 0
+\end{aligned}
+\]
+
+The point of this exercise in arithmetic is to show that the total variability in the data, as measured by the total corrected sum of squares, can be partitioned into a sum of squares of the differences between the treatment averages and the grand average, plus a sum of squares of the differences of observations within treatments from the treatment average. Now, the difference between the observed treatment averages and the grand average is a measure of the differences between treatment means, whereas the differences of observations within a treatment from the treatment average can be due only to random error. It's appropriate at this point to discuss some commonly used terminology. We call $SS_T$$ the total corrected sum of squares, while the term $SS_{\text{Trt}}$ is sometimes referred to as treatment sum of squares, the sum of squares due to treatments, or the between treatments sum of squares. The term $SS_E$ is called the sum of squares due to error, the error sum of squares, or the within treatments sum of squares. In the context of the regression approach to ANOVA, we speak of the sum of squares for residuals, or the residual sum of squares. 
+
+When calculating the total corrected sum of squares we are free to choose whatever values of $y_{ij}$ we wish, just as long as they produce the value $\bar y_{\cdot\cdot}= \frac{1}{an}\sum_{i}\sum_{j} y_{ij}$. A little thought tells us that of the $N=an$ observations, we are free to select any $N-1 = an-1$ of them, with the constraint that the $N$th observation needs to be such that it leads to the set value of $\bar y_{\cdot\cdot}$. We say that there are $N-1 = an-1$ degrees of freedom for $SS_T$. Similarly when calculating the treatment sum of squares:
+\[
+SS_\text{Trt} = n\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2
+\]
+there are $a$ treatment means $a-1$ of which we are free to choose, so the treatment sum of squares has $a-1$ degrees of freedom. Finally, within each treatment group, there are $n$ values, of which can freely choose $n-1$ to compute the treatment mean. Then, since there are $a$ treatment groups, we have $a(n-1) = an - a$ degrees of freedom for error. 
+
+It's also important to look at the $SS_\text{Trt}$ and $SS_E$ terms a little more closely. Consider the error sum of squares:
+\[
+\begin{aligned}
+SS_E &= \sum_{i=1}^a \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot})^2 \\
+&= \sum_{i=1}^a \bigg [\sum_{j=1}^n (y_{ij} - \bar y_{i\cdot})^2 \bigg ] \\
+&= \sum_{i=1}^a (n-1)s_i^2.
+\end{aligned}
+\]
+
+It is clear that this explicitly contains estimates of the sample variance in the $i$th treatment, for each of the $a$ treatments. We can combine these $a$ sample variances to obtain an estimate of the common population variance as follows:
+\[
+\begin{aligned}
+\frac{(n-1)s_1^2 + (n-1)s_2^2 + \cdots + (n-1)s_a^2}{(n-1)+(n-1)+\cdots +(n-1)} &= \frac{\sum_{i=1}^a \bigg [ \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot}) \bigg]}{\sum_{i=1}^a (n-1)} \\
+&= \frac{SS_E}{a(n-1)}
+\end{aligned}
+\]
+Thus, by dividing $SS_E$ by its degrees of freedom, we obtain an estimate of the common variance within each of the treatments. 
+
+Similarly, in the case where the null hypothesis holds (i.e. when there is no difference between treatment means), we could also use the variation of the treatment averages from the grand average to estimate $\sigma^2$. Specifically, 
+\[
+\frac{SS_\text{Trt}}{a-1} = \frac{n\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2}{a-1}
+\]
+is an estimate of $\sigma^2$ if the treatment means are equal. To see why this is the case, note that the quantity $\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 /(a-1)$ estimates $\sigma^2 / n$, the variance of the treatment averages, so $n$ times that quantity must estimate $\sigma^2$ if there are no differences in treatment means. 
+
+As a result of this analysis, we observe that the analysis of variance provides us with two estimates of $\sigma^2$ --- one based on the inherent variability within treatments and one based on the variability between treatments. If there are no differences in the treatment means, we would expect these two estimates to be very similar. Indeed, if these two estimates are widely different, then it leads us to suspect that the observed differences must be caused by differences in the treatment means. We formalise this by considering the mean squares (i.e. the sums of squares divided by their respective degrees of freedom), as follows:
+\[
+MS_\text{Trt} = \frac{SS_\text{Trt}}{a-1} \quad \text{and} \quad MS_E = \frac{SS_E}{a(n-1)}.
+\]
+It is relatively easy to show that:
+\[
+\mathbb E[MS_E] = \sigma^2
+\]
+and 
+\[
+\mathbb E[MS_\text{Trt}] = \sigma^2 + \frac{n\sum_{i=1}^a \tau_i^2} {a-1}.
+\]
+It is clear that if there are no differences in treatments, the $\tau_i = 0$ for all $i$ and the expected mean square for treatments reduces to $\sigma^2$ too. A test of the hypothesis of no difference in treatment means can be performed by comparing $MS_\text{Trt}$ and $MS_E$. To do this we exploit the fact that we have assumed the $\varepsilon_{ij}$ to be normally and independently distributed according to a $N(0, \sigma^2)$, so that $y_{ij}\sim NID(\mu + \tau_i, \sigma^2)$ and $SS_T$ is a sum of squares in normally distributed random variables and Cochran's theorem indicates that $\frac{SS_T}{\sigma^2} \sim \chi^2_{an-1}$ (a chi-squared distribution on $asn-1$ degrees of freedom. . 
