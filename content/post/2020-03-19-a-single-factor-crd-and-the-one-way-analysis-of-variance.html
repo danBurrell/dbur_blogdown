@@ -1,7 +1,7 @@
 ---
 title: A single factor CRD and the one-way analysis of variance
 author: Daniel Burrell
-date: '2020-03-19'
+date: '2020-04-03'
 slug: a-single-factor-crd-and-the-one-way-analysis-of-variance
 categories:
   - R
@@ -16,302 +16,853 @@ description: ''
 topics: []
 ---
 
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
 
 
-<p>I’m currently teaching a class on the statistical design of experiments, and we’re using SPSS currently. Shortly we’d like to switch to using R as the main statistical computing package. I also have a client who has asked me to teach her how to use R to perform basic one-way and two-way analysis of variance for data arising from completely randomised designs with single factor and 2-factorial treatment structure. This is child’s play, especially in R, but I thought I’d take the opportunity to work through a couple of good examples and record them here for future use.</p>
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
-<p>The examples used in this post come from Montgomery (1991, pp. 50-80)<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a> — the chapter on single factor experiments and the analysis of variance — and chapters eleven and twelve of Hays (1988)<a href="#fn2" class="footnote-ref" id="fnref2"><sup>2</sup></a> We will follow the examples in these texts closely while attempting to reproduce the results using R in some kind of relatively didactic manner.</p>
-</div>
-<div id="a-completely-randomised-design-crd-with-a-single-factor" class="section level2">
-<h2>A completely randomised design (CRD) with a single factor</h2>
-<p>Suppose that your job as an engineer working in product development has you working on maximizing the tensile strength of a new synthetic fiber to be used in improving the durability of men’s work shirts. Your <strong>prior knowledge</strong> leads you to suspect that increasing the cotton content of the fiber should lead to increased tensile strength, although this effect is likely to plateu if too much cotton is present. You think that <strong>a sensible range of effectiveness might be between <span class="math inline">\(10\%\)</span> and <span class="math inline">\(40\%\)</span> cotton</strong> in order to find the optimal tensile strength subject to maintaing other quality characteristics of the final worn product. How might you go about determining the “best” percentage amount of cotton within this range? One way is to design an experiment that keeps all else fixed (insofar as possible) and to manipulate (or purposely vary) the cotton content across representative levels within the desirable range.</p>
-<p>You decide to carry out a <strong>completely randomised design (CRD)</strong> because there’s no reason to suspect that different subsets of experimental units might be more similar than others, so there’s no reason to group them into blocks. You therefore have a completely randomised <strong>design structure</strong> (involving a random mapping (or assignment) between all the replications of treatments and all the experimental units — there are no restrictions to the randomization), and you have decided to use a simple one-way (single factor) <strong>treatment structure</strong> because you’re really only interested in varying <strong>a single factor</strong>, namely the percentage cotton content of the product. You aren’t really sure about how the response will taper off within the chosen range, so you choose 5 evenly spaced <strong>levels</strong> of the <strong>treatment factor</strong> at <span class="math inline">\(15\%\)</span>, <span class="math inline">\(20\%\)</span>, <span class="math inline">\(25\%\)</span>, <span class="math inline">\(30\%\)</span> and <span class="math inline">\(35\%\)</span> cotton content. You also decide on using 5 <strong>replicates</strong> (i.e. testing 5 specimens at each level of cotton).</p>
-<p>The above describes a single-factor experiment with <span class="math inline">\(a = 5\)</span> levels of the treatment factor and <span class="math inline">\(n = 5\)</span> replicates in which specimens of synthetic fiber (the <strong>experimental units</strong>) will be tested for their tensile strength. The only difference between the specimens, beyond unavoidable random variation, is the level of cotton that constitutes their makeup, expressed as a percentage cotton content; the 5 replicates means that there are 5 specimens at each of the 5 levels of cotton content, so that there will be <span class="math inline">\(N = a\times n = 25\)</span> independent tensile strength tests carried out in sequence. The tensile testing machine can only test a single specimen at a time, and there is at least some possibility that the machine might exhibit some changes through time, perhaps due to being calibrated at the start of the testing and having those settings progressively diminsh over time, or perhaps due to a warming-up effect that we don’t know about. There is also a distinct potential for the tester to inadvertantly contribute variability through time, perhaps through diminshing concentration, boredom, or finding their “groove” in the testing procedure half-way through the tests. Randomising the run-order of the tests will mitigate the effects of potential temporal confounders such as these.</p>
-<p>Use the function <code>agricolae::design.crd()</code> to produce the design. This function takes arguments as follows:</p>
+<p>I’m currently teaching a class on the statistical design of experiments, and we’re using SPSS as the statistical software to implement basic analyses of data from designed experiments at the moment. Shortly we’d like to switch to using R as the main statistical computing package. I also have a client who has asked me to teach her how to use R to perform basic one-way and two-way analysis of variance for data arising from completely randomised designs with single factor and 2-factorial treatment structures, respectively. This is child’s play, especially in R, but I thought I’d take the opportunity to work through a simple example for future use.</p>
+<p>To give credit where it is due, I have borrowed from Montgomery (1991) <em>Design and Analysis of Experiments</em>. Oehlert (2010) <a href="http://users.stat.umn.edu/~gary/book/fcdae.pdf"><em>A First Course in Design and Analysis of Experiments</em></a>, Meier (2018) <a href="https://stat.ethz.ch/~meier/teaching/anova/"><em>ANOVA: A Short Intro Using R</em></a> and an online tutorial introduction to one-way ANOVA by <a href="http://www.sthda.com/english/wiki/one-way-anova-test-in-r">STHDA</a> to develop this post.</p>
+<div id="what-is-the-one-way-anova-test" class="section level2">
+<h2>What is the one-way ANOVA test</h2>
+<p>The <strong>one-way analysis of variance (ANOVA)</strong> extends the two independent samples t-test to the case where there are more than two independent samples or groups to be compared. In a <strong>one-way ANOVA</strong> the data is organised into groups based on a single grouping variable, which is called, in the language of experimental design, a <strong>factor</strong>. For this reason the one-way ANOVA is sometimes referred to as a <em>one-factor</em> or <em>single-factor ANOVA</em>. The groups usually correspond to different treatment conditions. The single factor is often referred to as the <strong>treatment</strong> or <strong>treatment factor</strong> and the different treatment conditions are referred to as its <strong>levels</strong>.</p>
+<p>Let’s introduce some notation. Suppose we have a treatment factor with <span class="math inline">\(T\)</span> levels corresponding to <span class="math inline">\(T\)</span> distinct treatment conditions applied to <span class="math inline">\(N\)</span> experimental units in a completely randomised fashion such that each of the treatment conditions gets assigned to <span class="math inline">\(r_i\)</span> experimental units, where
+<span class="math display">\[
+\sum_{i=1}^T r_i = N.
+\]</span>
+The value <span class="math inline">\(r_j\)</span> is the sample size of the <span class="math inline">\(j\)</span>th treatment group, and is called it number of replicates. The optimal choice (with respect to statistical power) of the <span class="math inline">\(r_j\)</span> for all <span class="math inline">\(j\)</span> actually depends on the research question, but for the case where <span class="math inline">\(r_1 = r_2 = \cdots = r_T = r\)</span> (i.e. each treatment group has an equal number of replicates, or all the treatment groups have the same sample size), the design is said to be <strong>balanced</strong>.</p>
+<p>The goal of the ANOVA is to compare the impacts of <span class="math inline">\(T&gt;2\)</span> treatments on some response measurement. We do this by formulating a parametric model for our data. The classical model is called the <strong>cell means model</strong>. Let <span class="math inline">\(Y_{ij}\)</span> denote the <span class="math inline">\(j\)</span>th replicate observation in treatment group <span class="math inline">\(i\)</span>, where <span class="math inline">\(i = 1,\ldots,T\)</span> and <span class="math inline">\(j=1,\ldots, r_i\)</span>. In the <strong>cell means model</strong> we allow each treatment group to have its own <em>expected value</em> but we assume that the observations are independent and fluctuate around this value according to a normal distribution, i.e.,
+<span class="math display">\[
+Y_{ij} \sim N(\mu_i, \sigma^2),\quad \text{independent}
+\]</span>
+where</p>
 <ul>
-<li><code>trt</code> is a character vector specifying the names of the levels of the treatment factor,</li>
-<li><code>r</code> is an integer number of replicates, or a vector specifying different numbers of replicates for each factor level in the case of an unbalanced design,</li>
-<li><code>serie</code> specifies the approach to numbering plots; <code>1</code> gives double digit numbering (11, 12, etc.), <code>2</code> gives triple digit numbering (101, 102, etc.) and <code>3</code> gives quadruple digit numbering (1001, 1002, etc.); the default is <code>2</code>.</li>
-<li><code>seed</code> specifies the seed for the random number generator; the default is <code>0</code>,</li>
-<li><code>kinds</code> specifies the random number generator and takes values <code>"Wichmann-Hill"</code>, <code>"Marsaglia-Multicarry"</code>, <code>"Super-Duper"</code>, <code>"Mersenne-Twister"</code>, <code>"Knuth-TAOCP"</code>, <code>"user-supplied"</code>, <code>"Knuth-TAOCP-2002"</code> and <code>"default"</code> (which is the default for R, not the default for the function); the default for the function is <code>"Super-Duper"</code>,</li>
-<li><code>randomization</code> a logical value specifying whether to randomise of not; the default is <code>TRUE</code>.</li>
+<li><span class="math inline">\(\mu_i = \mathbb E[Y_{ij}]\)</span>, the expected value of the response random variable for treatment group <span class="math inline">\(i\)</span></li>
+<li><span class="math inline">\(\sigma^2 = \mathbb V[Y_{ij}]\)</span>, the variance of response random variable, which is assumed to be homogenous or constant across all treatment groups.</li>
 </ul>
-<p>The function returns design parameters in <code>parameters</code> and the fieldbook in <code>book</code>. Let’s use this function now, to generate a design for the fiber tensile strength experiment. First load some useful packages, including <code>agricolae</code>.</p>
-<pre class="r"><code># Load agricolae package
-if(!require(pacman)) {install.packages(&quot;pacman&quot;)}</code></pre>
-<pre><code>## Loading required package: pacman</code></pre>
-<pre class="r"><code>pacman::p_load(xlsx, tibble, dplyr, agricolae, magrittr, install=TRUE, update=FALSE)</code></pre>
-<p>Now, specify the parameters to pass to <code>agricolae::design.crd()</code>.</p>
-<pre class="r"><code># Specify design parameters to pass to agricolae::design.crd()
-fac_levels &lt;- c(&quot;15%&quot;, &quot;20%&quot;, &quot;25%&quot;, &quot;30%&quot;, &quot;35%&quot;)
-rep_num &lt;- 5
-plot_num &lt;- 3
-start_seed &lt;- 29680
-rand_gen &lt;- &quot;Mersenne-Twister&quot;</code></pre>
-<p>Now produce the design:</p>
-<pre class="r"><code># Call agricolae::design.crd
-d &lt;- design.crd(
-  trt = fac_levels,
-  r = rep_num,
-  serie = plot_num,
-  seed = start_seed,
-  kinds = rand_gen,
-  randomization = TRUE)</code></pre>
-<p>The output we’re most interested in is the design fieldbook, which we’ll tidy up a bit using <code>dplyr::transmute()</code>. To check that everything looks ok, display the first 5 cases using the function <code>head()</code>:</p>
-<pre class="r"><code>crd_fieldbook &lt;- d$book %&gt;%
-  dplyr::transmute(
-    exp_unit = d$book$plots,
-    test_seq = seq(1:length(d$book$plots)),
-    rep_num = d$book$r,
-    treatment = d$book$fac_levels
-  )
+<p>The above can be re-written as
+<span class="math display">\[
+Y_{ij} = \mu_i + \epsilon_{ij},
+\]</span>
+with (random) <em>errors</em> <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma^2)\)</span> by simply partitioning the <span class="math inline">\(N(\mu_i, \sigma^2)\)</span> distribution into a deterministic part <span class="math inline">\(\mu_i\)</span> and a stochastic part <span class="math inline">\(\epsilon_{ij}\)</span> fluctuating around <em>zero</em>. This clearly links to a simple linear regression, with <span class="math inline">\(Y\)</span> being the <strong>response</strong> and the treatment factor encoding the grouping information being a categorical <strong>predictor</strong>. The one-way ANOVA is nothing more than a regression model with a categorical predictor and normally distributed errors.</p>
+<p>The categorical predictor or factor can be either unordered (<strong>nominal</strong>) or ordered (<strong>ordinal</strong>). For example, south-east Queensland wheat variety would be an unordered (nominal) factor (e.g. with levels “Strzlecki”, “EGA Wylie” and “Baxter”). There is no sense of ordering between these different varieties. Glyphosate concentration could be an ordered (ordinal) factor (e.g. with ordered levels “1 percent solution”, “2 percent solution”, “5 percent solution” and “10 percent solution”). There is clearly an order relation on the levels of Glyphosate concentration; we expect <span class="math inline">\(1\% &lt; 2\% &lt; 5\% &lt; 10\%\)</span> in terms of the impact of the glyphosate as a herbicide.</p>
+<p>It’s also possible to further re-write the deterministic part as
+<span class="math display">\[
+\mu_i = \mu + \tau_i, \quad (i=1,\ldots,T)
+\]</span>
+to obtain a model structure of the form
+<span class="math display">\[
+Y_{ij} = \mu+\tau_i+\epsilon_{ij},
+\]</span>
+again with <span class="math inline">\(\epsilon_{ij} \sim N(0, \sigma^2)\)</span></p>
+<p>This is the <strong>effects model</strong> where <span class="math inline">\(\tau_i\)</span> is the <span class="math inline">\(i\)</span>th <strong>treatment effect</strong>. Think of <span class="math inline">\(\mu\)</span> as a “global mean” and <span class="math inline">\(\tau_i\)</span> as a “deviation from the global mean due to the effect of the <span class="math inline">\(i\)</span>th treatment”. Actually, this interpretation is not always correct, but it is helpful.</p>
+<p>Let’s look more closely at the parameters of these two models (cell means and effects models). The cell means model requires us to estimate <span class="math inline">\(\mu_1, \ldots,\mu_T\)</span> and <span class="math inline">\(\sigma^2\)</span> for a total of <span class="math inline">\(T+1\)</span> parameters. But the effects model requires us to estimate <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\tau_1,\ldots,\alpha_T\)</span> and <span class="math inline">\(\sigma^2\)</span> for a total of <span class="math inline">\(T+2\)</span> parameters. The addition of the extra parameter in the effects model renders it <strong>non-identifiable</strong> (because we have <span class="math inline">\(T+2\)</span> parameters and only <span class="math inline">\(T+1\)</span> independent bits of information with which to model them. In other words, we are free to “shift around” effects between <span class="math inline">\(\mu\)</span> and the <span class="math inline">\(\alpha_i\)</span>’s without altering the resulting values of <span class="math inline">\(\mu_i\)</span>. For example, we are free to add a constant to <span class="math inline">\(\mu\)</span>, say <span class="math inline">\(\mu + c\)</span> and then adjust the <span class="math inline">\(\tau_i\)</span>’s by subtracting the same constant, <span class="math inline">\(\tau_i - c\)</span>, and this will lead to the same value of <span class="math inline">\(\mu_i\)</span> for each <span class="math inline">\(i\)</span>. Because of this non-identifiability problem, we need to impose a constraint on the <span class="math inline">\(\tau_i\)</span>’s that effectively “removes” the additional parameter and restores identifiability. Some of the commonly adopted constraints are:</p>
+<ul>
+<li><strong>sum-to-zero constraint:</strong> <span class="math inline">\(\quad \sum_{i=1}^T \tau_i = 0\)</span> leading to the interpretation that <span class="math inline">\(\quad \mu = \frac{1}{T} \sum_{i=1}^T \mu_i\)</span> (NB. In R this corresponds to the <code>contr.sum</code> method).</li>
+<li><strong>weighted sum-to-zero constraint:</strong> <span class="math inline">\(\quad \sum_{i=1}^T r_i\tau_i = 0\)</span> leading to the interpretation that <span class="math inline">\(\mu = \frac{1}{N} \sum_{i=1}^T r_i\mu_i\)</span>.</li>
+<li><strong>reference group constraint:</strong> <span class="math inline">\(\tau_1 = 0\)</span> leading to the interpretation that <span class="math inline">\(\mu = \mu_1\)</span> (NB. In R this corresponds to the default <code>contr.treatment</code> method).</li>
+</ul>
+<p>Only <span class="math inline">\(T-1\)</span> elements of the treatment effects are allowed to freely vary. If we know <span class="math inline">\(T-1\)</span> of the <span class="math inline">\(\tau_i\)</span> values, then we automatically know the remaining <span class="math inline">\(\tau_i\)</span> value. This fact is encoded in the treatment <strong>degrees of freedom (df)</strong>: we say that the treatment effects has <span class="math inline">\(T-1\)</span> degrees of freedom.</p>
+<p>Without going into full details, we may estimate the parameters of the model using the <strong>least squares criterion</strong> which minimizes the squared deviation from the observed data <span class="math inline">\(y_{ij}\)</span> to the model values <span class="math inline">\(\mu+\tau_i\)</span>, i.e., for the cell means model:
+<span class="math display">\[
+\hat\mu_i = \arg\min_{\mu_i} \sum_{i=1}^T\sum_{j=1}^{r_i} (y_{ij} - \mu_i)^2,
+\]</span>
+and for the effects model:
+<span class="math display">\[
+\hat\mu,\hat\tau_i = \arg\min_{\mu,\tau_i} \sum_{i=1}^T\sum_{j=1}^{r_i} (y_{ij} - \mu - \tau_i)^2.
+\]</span></p>
+<p>We use the following notation:</p>
+<ul>
+<li>sum of group <span class="math inline">\(i\)</span>: <span class="math inline">\(\quad y_{i\cdot}=\sum_{j=1}^{r_i} y_{ij}\)</span></li>
+<li>sum of all observations: <span class="math inline">\(\quad y_{\cdot\cdot}=\sum_{i=1}^T\sum_{j=1}^{r_i} y_{ij}\)</span></li>
+<li>mean of group <span class="math inline">\(i\)</span>: <span class="math inline">\(\quad \bar y_{i\cdot}=\frac{1}{r_i}\sum_{j=1}^{r_i} y_{ij}\)</span></li>
+<li>overall (total/grand/global) mean: <span class="math inline">\(\quad \bar y_{\cdot\cdot}=\frac{1}{N}\sum_{i=1}^T\sum_{j=1}^{r_i} y_{ij}\)</span></li>
+</ul>
+<p>As we can independently estimate the values of the different group means, we get that <span class="math inline">\(\hat \mu_i = \bar y_{i\cdot}\)</span>, so that:
+<span class="math display">\[
+\hat \mu_i = \hat \mu + \hat \tau_i = \bar y_i.
+\]</span>
+Depending on the side-constraint that we use we get different results for <span class="math inline">\(\hat\tau_i\)</span>.</p>
+<p>We use the <strong>mean square error</strong> <span class="math inline">\(MS_E\)</span> to estimate the error variance <span class="math inline">\(\sigma^2\)</span>, giving:
+<span class="math display">\[
+\hat\sigma^2 = MS_E = \frac{1}{N-T}SS_E,
+\]</span>
+where <span class="math inline">\(SS_E\)</span> is the <strong>residual</strong> or <strong>error sum of squares</strong>:
+<span class="math display">\[
+SS_E = \sum_{i=1}^T\sum_{j=1}^{r_i} (y_{ij} - \hat \mu_i)^2.
+\]</span>
+A little algebra illustrates the relationship between these values and the sample variance of the observations in each treatment group. We can write the mean square error as:
+<span class="math display">\[
+MS_E = \frac{1}{N-T} \sum_{i=1}^T(r_i - 1)s_i^2,
+\]</span>
+since <span class="math inline">\(s_i^2\)</span> is by definition:
+<span class="math display">\[
+s_i^2 = \frac{1}{r_i - 1} \sum_{j=1}^{r_i} (y_{ij} - \hat\mu_i)^2.
+\]</span>
+The denominator <span class="math inline">\(N-T\)</span> in <span class="math inline">\(\hat\sigma^2 = MS_E\)</span> ensures that as an estimator, it unbiasedly estimates the error variance <span class="math inline">\(\sigma^2\)</span>.</p>
+<p>Before we look at an example, let’s first review in a less mathematical and more verbally descriptive form, the core details of the ANOVA.</p>
+</div>
+<div id="assumptions-of-anova-test" class="section level2">
+<h2>Assumptions of ANOVA test</h2>
+<p>A one-way ANOVA test can only be applied when the following assumptions are met:</p>
+<ul>
+<li>The observations are obtained independently and randomly from the population defined by the factor levels. That is, each factor level identifies an independent, random sample from the population of interest.</li>
+<li>The data of each factor level are normally distributed. That is, the populations from which the independent samples are randomly drawn under each treatment group are normally distributed.</li>
+<li>These normal populations have a common variance. That is, despite the distributions of different treatment groups being allowed to have different means or expected values, the normal variance is meant to be constant across all treatment groups.</li>
+</ul>
+<p>The third assumption is theoretically sensible when you think that in an experiment local control has been exercised and the assignment of treatments to experimental units has been at random. We are selecting from a larger population of <em>presumably</em> relatively homogeous experimental units, and then the only thing that should be different about them, apart from inherent random variability (captured by the error variance), is whatever the applied treatments do to “shift” the treatment means away from the underlying overall mean. So, it’s reasonable to expect that the variance of each treatment group is identical to the inherent random variability of the underlying population, namely the random error variance, since we only expect treatments to impact the normal mean and not its variance. Of course, the mechanism by which the treatment impacts the response may be less docile than our assumptions allow, and so in practice this assumption (and the others) may not hold. In terms of robustness, it turns out that the most important assumption is independence, followed by homogeneity of variance. The way in which we design and conduct the experiment is intended to force independence as much as possible. We can use <strong>Levene’s test</strong> and side-by-side boxplots to make judgements about the variability. Also, a general rule of thumb suggests that if the largest standard deviation of a treatment group is not more than twice as large as the smallest standard deviation of a treatment group, then we ought not be overly concerned about variance heterogeniety (Of course I must confess I haven’t any real idea what the basis of this rule of thumb is, so I am hesitant to propagate it). To assess normality we can use kernel density plots and normal quantile-quantile plots id there is sufficient data. There are a variety of formal tests too. Common ones include the Kolmogorov-Smirnov test and the Shapiro-Wilks test. More will be said about testing the validity of the ANOVA assumptions in a later section.</p>
+</div>
+<div id="how-one-way-anova-test-works" class="section level2">
+<h2>How one-way ANOVA test works</h2>
+<p>If you’re anything like me, you might still be wondering why on earth we use an analysis of <em>variance</em> to compare <em>means</em>!
+Well, firstly, the hypotheses we seek to test using a one-way ANOVA F-test are as follows:</p>
+<p><span class="math display">\[
+\begin{aligned}
+H_0 &amp;: \mu_1 = \mu_2 = \cdots = \mu_T \\
+H_1 &amp;: \mu_k \neq \mu_l \quad \text{for at least one pair of treatment means}
+\end{aligned}
+\]</span></p>
+<p>The ability to do this rests on the assumptions of homogeneity of variance in normal populations. Conditional on the null hypothesis being true (i.e. if it is true), we can come up with two distinct variance estimators that should both estimate the same population parameter, namely the error variance <span class="math inline">\(\sigma^2\)</span>. We’ve already seen the first of these, the <strong>mean square error <span class="math inline">\(MS_E\)</span></strong>, which is the (weighted) average of the sample variances (i.e. the pooled sample variance). This measures the <strong>variance within samples</strong> or the <strong>variation that is inherent and due to random error</strong>. But we can also derive an estimator of the <strong>variance between samples</strong>, a weighted measure of the variance of the sample means. This measures the <strong>variation due to treatments or explained variation</strong>. But under the null hypothesis, and crucially, if the assumption of homogeneity of variance is met, the distributions should be exactly the same, so these two estimators should have similar values (they’re estimating the same underlying construct). We build these two estimators as follows. The <span class="math inline">\(MS_E\)</span> is built by calculating the <span class="math inline">\(SS_E\)</span> and dividing by the degrees of freedom for error, as shown earlier. In a similar fashion, we can compute a <strong>treatment sum of squares <span class="math inline">\((SS_T)\)</span></strong> and divide it by the degrees of freedom for treatments to get our variance estimator, the <strong>mean square for treatments <span class="math inline">\((MS_T)\)</span></strong>. Informally, under the null hypothesis, we expect that these two independent estimators of the error variance should have a ratio of 1. That is, <strong>if the null hypothesis is true</strong>, we expect:
+<span class="math display">\[
+\frac{MS_T}{MS_E}\approx 1
+\]</span>
+But because we’re assuming normality we can make this argument formal. Both these variance estimators can be algebraically re-arranged to enable us, via <strong>Cochran’s theorem</strong>, to claim that they are random variables having independent (central) chi-square <span class="math inline">\(\chi^2\)</span> distributions with corresponding degrees of freedom (i.e. for <span class="math inline">\(MS_T\)</span> we have <span class="math inline">\(\nu_1 = T-1\)</span> and for <span class="math inline">\(MS_E\)</span> we have <span class="math inline">\(\nu_2 = N-T\)</span> degrees of freedom). This is good because the ratio of two independent (central) chi-square distributed random variables has an F distribution, so that the ratio of the variation due to treatments (between samples) to the variation due to error (within samples) should be F-distributed with <span class="math inline">\(\nu_1\)</span> numerator degrees of freedom and <span class="math inline">\(\nu_2\)</span> denominator degrees of freedom.</p>
+<p>In summary, to compare two or more treatment means using one-way ANOVA:</p>
+<ol style="list-style-type: decimal">
+<li>Compute the common variance, which is called the variance within samples, error variance or residual variance as <span class="math inline">\(\hat\sigma^2_{E} = MS_E\)</span> with <span class="math inline">\(\nu_1 = N-T\)</span> degrees of freedom.</li>
+<li>Compute the variance between sample means as <span class="math inline">\(\hat\sigma^2_{T}\)</span> with <span class="math inline">\(\nu_2 = T-1\)</span> degrees of freedom.</li>
+<li>Produce the observed F-statistic as the ratio <span class="math inline">\(\frac{\hat\sigma^2_{T}}{\hat\sigma^2_{E}}\sim F_{\nu_1,\nu_2}\)</span>.</li>
+</ol>
+<p>Then, informally, an observed F-statistic less than or equal to 1 indicates no significant difference between the treament means, but as the F-statistic increases beyond 1 the strength of evidence for a difference between treatment means grows. Formally, we can use an arbitrary significance threshold and compare our observed F-statistic against the associated F critical value to declare significance or not. Or, better than this, we could compute the p-value the corresponds to the observed F-statistic and then use that as a measure of evidence against the null hypothesis of equal means (the smaller the p-value, the more likely it becomes that the null hypothesis is not true).</p>
+</div>
+<div id="before-you-do-a-formal-analysis" class="section level2">
+<h2>Before you do a formal analysis …</h2>
+<p>Let’s look at an example one-way ANOVA. Before we actually perform a formal one-way ANOVA test, we need to do a few things, so let’s do those things now.</p>
+<div id="get-the-data-into-r" class="section level3">
+<h3>Get the data into R</h3>
+<p>One of my roles at the institution where I work is as a consultant to a research centre that focuses on phytopathology and plant epidemiology in the context of agricultural crops. A portion of the researchers I work with concentrate on studying the impacts of microscopic worms called nematodes on different aspects of plant health. With that in mind, I’m going to construct (borrow) an artificial example in the guise of a nematode study.</p>
+<p>Suppose that a phytopathologist is interested in studying the impacts of different population densities of a certain nematode species on the growth of tomato seedlings. In consultation with their biometrician they decide on a completely randomised design in which they will introduce 4 levels of population density of the nematodes into 16 pots to be planted with the same type of tomato seed, so that in the end each level of nematode population density is assigned at random to 4 pots.</p>
+<p>This data could be recorded in a variety of different files, usually something like an Excel spreadsheet or a comma-separated, tab-delimited or other kind of delimited file. To get access to this data in R it needs to be imported or input by hand. It should typically be input in “tidy” or “long-form” with each column corresponding to a single variable, and each row corresponding to a single case or unit of observation (not necessarily the same as an experimental unit).</p>
+<p>There are a variety of ways to access the data from within R. If the data is saved as a <code>*.txt</code> file we use:</p>
+<pre class="r"><code>my_data &lt;- read.delim( file.choose() )</code></pre>
+<p>This provides an interactive means of accessing the particular file where the data is stored. Alternatively, you can pre-determine the path to your file and use:</p>
+<pre class="r"><code>path_to_my_file &lt;- &quot;C://path/to/my/file/data.txt&quot;
+my_data &lt;- read.delim( file=path_to_my_file )</code></pre>
+<p>where, obviously, the specific path to your file should be used.</p>
+<p>If the data is saved as a <code>*.csv</code> file we could use:
+If the data is saved as a <code>*.txt</code> file we use:</p>
+<pre class="r"><code># Interactive option:
+my_data &lt;- read.csv( file.choose() )
 
-head(crd_fieldbook, n=5)</code></pre>
-<pre><code>##   exp_unit test_seq rep_num treatment
-## 1     1001        1       1       30%
-## 2     1002        2       1       20%
-## 3     1003        3       2       30%
-## 4     1004        4       1       15%
-## 5     1005        5       3       30%</code></pre>
-<p>We can also export this fieldbook to an Excel spreadsheet, using the <code>write.xlsx()</code> function from the package <code>xlsx</code>. Here we store the fieldbook in a sheet called <code>"crd_fieldbook"</code>.</p>
-<pre class="r"><code>write.xlsx(
-  x = crd_fieldbook,
-  file = &quot;C:/myWork/dbur_blogdown/Misc/crd_out.xlsx&quot;,
-  sheetName = &quot;crd_fieldbook&quot;,
-  col.names = TRUE,
-  row.names = FALSE, 
-  append = FALSE
+# Or path specification option:
+path_to_my_file &lt;- &quot;C://path/to/my/file/data.csv&quot;
+my_data &lt;- read.csv( file=path_to_my_file )</code></pre>
+<p>If the data is saved as an excel spreadsheet file, we need to install/load the <code>readxl</code> package and then use the <code>read_excel()</code> function as follows:</p>
+<pre class="r"><code># Get pacman to manage install/loads of packages
+if(! require(pacman)) install.packages(&quot;pacman&quot;)
+
+# Load the readxl package
+pacman::p_load(readxl)
+
+# Import the data:
+path_to_my_file &lt;- &quot;C://path/to/my/file/data.xlsx&quot;
+my_data &lt;- read_excel( 
+  path=path_to_my_file,
+  sheet=NULL, 
+  range=NULL,
+  col_names=TRUE,
+  na=&quot;NA&quot;)</code></pre>
+<p>In this particular instance, however, I’m going to input the data by hand. To do this, I’m going to install/load the suite of <code>tidyverse</code> packages, and the <code>knitr</code> and <code>kableExtra</code> packages:</p>
+<pre class="r"><code>pacman::p_load(tidyverse, knitr, kableExtra)</code></pre>
+<p>Then I’m going to use a tidy <code>tibble</code> to construct a tidy data frame:</p>
+<pre class="r"><code>my_data &lt;- tibble(
+  nematode_density = c(0, 1000, 5000, 10000) %&gt;% 
+    rep(each=4) %&gt;%
+    ordered(),
+  seedling_growth = c(10.8, 9.1, 13.5, 9.2, 
+                      11.1, 11.1, 8.2, 11.3,
+                       5.4, 4.6, 7.4, 5.0,
+                       5.8, 5.3, 3.2, 7.5 )
 )</code></pre>
-<p>Suppose that you run the experiment according to the fieldbook run order and record the results in an adjacent column. The measured results are the pressure applied at failure (pounds per square inch). The data from this experiment are recorded in the Excel spreadsheet alongside the fieldbook.</p>
-<p>The observed data in this case is shown in the following table:</p>
-<pre class="r"><code>print(crd_data)</code></pre>
-<pre><code>##    exp_unit test_seq rep_num treatment  y
-## 1      1001        1       1       30% 19
-## 2      1002        2       1       20% 12
-## 3      1003        3       2       30% 25
-## 4      1004        4       1       15%  7
-## 5      1005        5       3       30% 22
-## 6      1006        6       2       20% 17
-## 7      1007        7       4       30% 19
-## 8      1008        8       3       20% 12
-## 9      1009        9       1       35%  7
-## 10     1010       10       2       35% 10
-## 11     1011       11       3       35% 11
-## 12     1012       12       1       25% 14
-## 13     1013       13       2       15%  7
-## 14     1014       14       2       25% 18
-## 15     1015       15       4       20% 18
-## 16     1016       16       3       25% 18
-## 17     1017       17       3       15% 15
-## 18     1018       18       4       15% 11
-## 19     1019       19       5       30% 23
-## 20     1020       20       4       35% 15
-## 21     1021       21       4       25% 19
-## 22     1022       22       5       25% 19
-## 23     1023       23       5       35% 11
-## 24     1024       24       5       15%  9
-## 25     1025       25       5       20% 18</code></pre>
-<p>Let’s now examine the data graphically using the package <code>ggstatsplot</code> package, which is built on <code>ggplot2</code> and provides information -rich visualisations of data, including important statistical information.</p>
-<pre class="r"><code>pacman::p_load(ggstatsplot)
+This produces the data shown in the scroll box below.<br />
 
-p1 &lt;- ggstatsplot::ggbetweenstats(
-  data = crd_data,
-  x = treatment,
-  y = y,
-  plot.type = &quot;violin&quot;,
-  type = &quot;parametic&quot;,
-  pairwise.comparisons = TRUE,
-  effsize.type = &quot;partial_eta&quot;,
-  partial = TRUE,
-  effsize.noncentral = TRUE,
-  results.subtitle = TRUE,
-  xlab = &quot;Cotton percentage&quot;,
-  ylab = &quot;Tensile strength (psi)&quot;,
-  title = &quot;Pairwise comparisons of means&quot;,
-  sample.size.label = FALSE,
-  var.equal = FALSE,
-  nboot = 1000,
-  mean.plotting = TRUE,
-  bf.message = FALSE,
-  messages = FALSE
-)
-p1</code></pre>
-<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p>It is clear from the graph that tensile strength increases as cotton content increases, up to about 30 percent cotton, and then sharply decreases between 30 and 35 percent cotton. The variability between groups appears to be relatively homogenous. We can already be reasonably confident that cotton content really does influence tensile strength and that the maximum strength occurs at around <span class="math inline">\(30\%\)</span> cotton. To gain definitive evidence on which to base our decisions, we should use the analysis of variance procedure to test for the equality of the means of the five treatment groups.</p>
+<table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-8">Table 1: </span>Raw data for seedling growth under different nematode densities
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Nematodes
+</th>
+<th style="text-align:center;">
+Growth (cm)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:center;">
+10.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:center;">
+9.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:center;">
+13.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:center;">
+9.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000
+</td>
+<td style="text-align:center;">
+11.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000
+</td>
+<td style="text-align:center;">
+11.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000
+</td>
+<td style="text-align:center;">
+8.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000
+</td>
+<td style="text-align:center;">
+11.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5000
+</td>
+<td style="text-align:center;">
+5.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5000
+</td>
+<td style="text-align:center;">
+4.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5000
+</td>
+<td style="text-align:center;">
+7.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5000
+</td>
+<td style="text-align:center;">
+5.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10000
+</td>
+<td style="text-align:center;">
+5.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10000
+</td>
+<td style="text-align:center;">
+5.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10000
+</td>
+<td style="text-align:center;">
+3.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10000
+</td>
+<td style="text-align:center;">
+7.5
+</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div id="the-analysis-of-variance" class="section level2">
-<h2>The analysis of variance</h2>
-<p>Our aim is to compare the sample means of the response variable (tensile strength) between the different treatment groups (specified by the level of cotton content). In general we let <span class="math inline">\(y_{ij}\)</span> represent the <span class="math inline">\(j\)</span>th observation taken under treatment <span class="math inline">\(i\)</span>, where there are <span class="math inline">\(n\)</span> observations under each treatment, and <span class="math inline">\(a\)</span> different treatments. An analysis of variance tests the null hypothesis:
-<span class="math display">\[
-  H_0: \mu_1 = \mu_2 =\ldots=\mu_a
-\]</span>
-against the alternative hypothesis:
-<span class="math display">\[
-  H_1: \text{At least one of the means differs signficantly from the others.} 
-\]</span></p>
-<p>In a general single-factor (or one-way) analysis of variance (ANOVA), we model the observed data by a linear statistical model of the form:
-<span class="math display">\[
-\begin{aligned}
-  y_{ij} &amp;= \text{deterministic component} + \text{random component} \\
-  &amp;= \mu_i + \varepsilon_{ij} \quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n) \quad \text{[treatment means model]}\\
-  &amp;= \mu + \tau_i + \varepsilon_{ij}\quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n) \quad \text{[treatment effects model]}\\
-\end{aligned}
-\]</span>
-In the above, we distinguish between two equivalent models, namely the treatment means model and the treatment effects model. In the former the mean response under the <span class="math inline">\(i\)</span>th treatment is <span class="math inline">\(\mu_i\)</span> whereas in the latter model we have <span class="math inline">\(\mu_i = \mu + \tau_i\)</span> to indicate a common mean response <span class="math inline">\(\mu\)</span> across all treatment groups and additionally the effect of the <span class="math inline">\(i\)</span>th treatment. It is assumed that <span class="math inline">\(\varepsilon_{ij} \sim \text{iid.}\, N(0,\sigma^2)\)</span>.</p>
-<p>Using the treatment effects model, our hypotheses are modified to assessing a null hypothesis of no difference in effects:
-<span class="math display">\[
-  H_0: \tau_1 = \tau_2 =\ldots=\tau_a
-\]</span>
-against an alternative that at least one treatment effect differs significantly from the others:
-<span class="math display">\[
-  H_1: \text{At least one of the effects differs signficantly from the others.} 
-\]</span></p>
-<p>The model is called the <strong>single factor ANOVA</strong> or the <strong>one-way ANOVA</strong> because we’re dealing with just one treatment factor that encodes the group structure by which replicates of each treatment are applied randomly to the whole set of experimental units. Because there are no restrictions to how treatments are randomly allocated to experimental units, they’re just allocated to the whole set of <span class="math inline">\(N = an\)</span> units in the sample, this is called a <strong>Completely Randomized Design</strong>.</p>
-<div id="a-note-on-fixed-versus-random-effects" class="section level3">
-<h3>A note on fixed versus random effects</h3>
-<p>It is important to realise that the model <span class="math inline">\(y_{ij} = \mu + \tau_i + \varepsilon_{ij}\)</span> can describe two different situations when it comes to the treatment effects. First, as is the case in the fiber tensile strength testing experiment, the <span class="math inline">\(a\)</span> levels of the treatment factor could have been chosen and fixed by the experimenter. In such a case, interest is in comparing the treatment means (or effects) and the conclusions apply only to the factor levles considered in the experiment. They cannot be extended to similar treatments (for example, we cannot say anything much about the response when fibers consist of <span class="math inline">\(37\%\)</span> or <span class="math inline">\(40\%\)</span> cotton because these specific treatment levels are not included in the experiment). The analysis will focus on estimating the model parameters <span class="math inline">\((\mu, \tau_{i=1:a}, \sigma^2)\)</span>. This is called a <strong>fixed-effects model</strong>.</p>
-<p>An alternative case is where the particula treatments used constitute a random sample from a larger population of treatments. In such a case we are interested in extending our conclusions (which are based on a sample of treatments) to make inferences about all treatments in the population, whether they were considered in the experiment or not. Here the <span class="math inline">\(\tau_i\)</span> are not fixed values, but are random variables and interest is usually less centered on estimating means or effects of the particular ones chosen and more on estimating the variability of the <span class="math inline">\(\tau_i\)</span>. This is called a <strong>random-effects model</strong> or a <strong>components of variance model</strong>. I’ll do a post on random-effects models some other day, but in our example the fixed-effects model analysis is appropriate.</p>
+<div id="do-some-basic-pre-analysis-checks" class="section level3">
+<h3>Do some basic pre-analysis checks</h3>
+<p>Once data is imported or input into R, we need to subject it to scrutiny. We will check to see that R has read the data in and assigned correct types, and will look for missing values and so on. To glimpse the data use:</p>
+<pre class="r"><code>dplyr::glimpse(my_data)</code></pre>
+<pre><code>## Observations: 16
+## Variables: 2
+## $ nematode_density &lt;ord&gt; 0, 0, 0, 0, 1000, 1000, 1000, 1000, 5000, 5000, 50...
+## $ seedling_growth  &lt;dbl&gt; 10.8, 9.1, 13.5, 9.2, 11.1, 11.1, 8.2, 11.3, 5.4, ...</code></pre>
+<p>We see that there are <span class="math inline">\(N=16\)</span> observations with each observation taken on an experimental experimental unit. There are two variables, a categorical ordinal factor <code>nematode_density</code> and continuous measurement <code>seedling_growth</code>. The response variable <span class="math inline">\(y_{ij}\)</span> here is the increase in height of the tomato seedlings (measured in centimetres) 16 days after planting. We can determine the number of treatment groups using <code>levels()</code> and <code>nlevels()</code> as follows:</p>
+<pre class="r"><code>with(my_data, levels(nematode_density))</code></pre>
+<pre><code>## [1] &quot;0&quot;     &quot;1000&quot;  &quot;5000&quot;  &quot;10000&quot;</code></pre>
+<pre class="r"><code>with(my_data, nlevels(nematode_density))</code></pre>
+<pre><code>## [1] 4</code></pre>
+<p>This tells us that there are <span class="math inline">\(K=4\)</span> treatment groups corresponding to zero nematodes, 1000 nematodes, 5000 nematodes and 10000 nematodes. To determine whether the data is balanced, use <code>group_by()</code> and <code>summarise()</code> from the <code>dplyr</code> package:</p>
+<pre class="r"><code>my_data_grouped &lt;- my_data %&gt;% 
+  group_by(nematode_density)
+
+summary_grouped &lt;- my_data_grouped %&gt;% 
+  summarise(count = n(),
+            mean = mean(seedling_growth),
+            sd = sd(seedling_growth)
+            )</code></pre>
+<table class="table" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<caption style="font-size: initial !important;">
+<span id="tab:unnamed-chunk-12">Table 2: </span>Summary of group means and standard deviations.
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Nematodes
+</th>
+<th style="text-align:center;">
+Reps
+</th>
+<th style="text-align:center;">
+Mean
+</th>
+<th style="text-align:center;">
+SD
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+10.65
+</td>
+<td style="text-align:center;">
+2.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+1000
+</td>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+10.43
+</td>
+<td style="text-align:center;">
+1.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+5000
+</td>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+5.60
+</td>
+<td style="text-align:center;">
+1.24
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+10000
+</td>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+5.45
+</td>
+<td style="text-align:center;">
+1.77
+</td>
+</tr>
+</tbody>
+</table>
+<p>Since the numbers in the <strong>Replicates</strong> column are all equal, we know this data is balanced with <span class="math inline">\(r=4\)</span> replicates of each treatment. Also, we can look at the empirical group standard deviations in the <strong>SD</strong> column to observe that the smallest such standard deviation is 1.24 while the largest one is 2.05. Since the ratio of the largest to the smallest standard deviation is not greater than 2, as a rule of thumb, we can be informally confident that the group populations have homogenous variances. Notice, too, that there appears to be a decreasing trend in the means as we move from having uncontaminated soil, to having up to 10000 nematodes in the soil.This is probably what we expect, since the usual contention is that the presence of nematodes has a negative impact on plant growth.</p>
+</div>
+<div id="visualise-the-data" class="section level3">
+<h3>Visualise the data</h3>
+<p>A picture paints a thousand words, and we can easily explore the data visually using the <code>ggplot2</code> package. We first install the latest CRAN release of <code>ggplot2</code> as follows:</p>
+<pre class="r"><code>pacman::p_load(ggplot2)</code></pre>
+<p>Then we’ll use side-by-side boxplots to get a feel for the data.</p>
+<pre class="r"><code># The basic boxplot
+bxp_1 &lt;- my_data %&gt;%
+  ggplot(mapping = aes(x = nematode_density,
+                       y = seedling_growth,
+                       fill = nematode_density), 
+         col = &quot;black&quot;) +
+  geom_boxplot(
+    outlier.colour = &quot;red&quot;
+    )
+
+# Specify title, labels, caption etc.
+bxp_2 &lt;- bxp_1 +
+  labs(
+    title = &quot;Distribution of seedling growth \n by level of nematode density&quot;,
+    x = &quot;Nematode Treatment&quot;, 
+    y = &quot;Growth of seedlings (cm)&quot;,
+    fill = &quot;Treatment Group&quot;,
+    caption = &quot;The negative impact of nematodes on seedling growth appears to occur \n as we move from having 1000 nematodes to having 5000 or more.&quot;) +
+  theme(
+    plot.title = element_text(color=&quot;red&quot;, size=13, face=&quot;bold.italic&quot;),
+    axis.title.x = element_text(color=&quot;blue&quot;, size=12, face=&quot;bold&quot;),
+    axis.title.y = element_text(color=&quot;#993333&quot;, size=12, face=&quot;bold&quot;)) +
+  scale_fill_brewer(palette = &quot;Dark2&quot;)
+  
+bxp_2</code></pre>
+<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>Now, let’s produce a means plot:</p>
+<pre class="r"><code>meanplot &lt;- ggplot(data = my_data,
+                   mapping = aes(x = nematode_density,
+                                 y = seedling_growth))
+
+meanplot_1 &lt;- meanplot +
+  stat_summary(geom = &quot;point&quot;, fun = &quot;mean&quot;, colour = &quot;#6600CC&quot;, size = 3)
+
+meanplot_2 &lt;- meanplot_1 +
+  geom_jitter(mapping = aes(colour = nematode_density), 
+              width = 0.1,
+              size = 2)
+
+summary_grouped &lt;- summary_grouped %&gt;%
+  mutate(me = qt(0.95, df=3)*sd/sqrt(count),
+         lo = mean - me,
+         hi = mean + me,
+         x_start = nematode_density,
+         x_end = c(nematode_density[-1], NA),
+         y_start = mean,
+         y_end = c(mean[-1], NA))
+
+meanplot_3 &lt;- meanplot_2 +
+  geom_errorbar(data = summary_grouped,
+                mapping = aes(y = mean, ymin = lo, ymax = hi),
+                colour = &quot;#6600CC&quot;,
+                width = 0.1,
+                size = 1.1,
+                alpha = 0.6)
+
+meanplot_4 &lt;- meanplot_3 +
+  geom_segment(data = summary_grouped,
+               mapping = aes(x=x_start, y=y_start, xend=x_end, yend = y_end),
+               colour = &quot;#6600CC&quot;,
+               size = 1.1,
+               alpha = 0.6)
+
+
+meanplot_5 &lt;- meanplot_4 +
+  labs(x = &quot;Nematode Treatment&quot;,
+       y = &quot;Seedling Growth (cm)&quot;,
+       title = &quot;Means plot of seedling growth by nematode density \n with LSD error bars&quot;,
+       fill = &quot;Treatment Group&quot;) +
+  theme(plot.title = element_text(color=&quot;red&quot;, size=13, face=&quot;bold.italic&quot;),
+        axis.title.x = element_text(color=&quot;blue&quot;, size=12, face=&quot;bold&quot;),
+        axis.title.y = element_text(color=&quot;#993333&quot;, size=12, face=&quot;bold&quot;)) +
+  scale_colour_brewer(palette = &quot;Dark2&quot;)
+
+meanplot_5</code></pre>
+<pre><code>## Warning: Removed 1 rows containing missing values (geom_segment).</code></pre>
+<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>From these graphs it is fairly clear that we expect there to be a significant difference between means in an ANOVA test. Let’s see, shall we?</p>
 </div>
 </div>
-<div id="analysis-of-the-fixed-effects-model" class="section level2">
-<h2>Analysis of the fixed-effects model</h2>
-<p>The fixed-effects model has the form:
-<span class="math display">\[
-y_{ij} = \mu + \tau_i + \varepsilon_{ij}\quad (i=1,2,\ldots,a;\, j=1, 2,\ldots,n)
-\]</span>
-where we have <span class="math inline">\(a\)</span> treatment effects and the overall mean to estimate. This is one additional parameter beyond what is identifiable computationally. A constraint needs to be imposed on the parameters in order to make the problem well-posed. Usually the treatment effects <span class="math inline">\(\tau_i\)</span> are considered to be deviations from the overall mean <span class="math inline">\(\mu\)</span>, so it makes sense that some will add onto the mean and others will subtract from the mean. It is sensible to assume that the sum of the treatment effects will be zero, so we typically impose this <strong>sum-to-zero</strong> constraint on the treatments effects:
-<span class="math display">\[
-\sum_{i=1}^{a} \tau_i=0.
-\]</span></p>
-<p>Now, let’s introduce some shorthand notation to help us set out the mathematics of the one-way ANOVA. We will use a <strong>dot</strong> to indicate summation over an index, so that <span class="math inline">\(y_{i\cdot}\)</span> represents the sum of the <span class="math inline">\(n\)</span> replicate observations under the <span class="math inline">\(i\)</span>th treatment (the treatment totals) and <span class="math inline">\(\bar y_{i\cdot}\)</span> is the sample average of those <span class="math inline">\(n\)</span> observations (the treatment means). That is:
-<span class="math display">\[
-y_{i\cdot}=\sum_{j=1}^n y_{ij} \quad\text{and} \quad \bar y_{i\cdot} = \frac{y_{i\cdot}}{n} \quad (i=1,2,\ldots,a).
-\]</span>
-Similarly, <span class="math inline">\(y_{\cdot\cdot}\)</span> is the sum over all the observations across all treatment groups (the grand total), and <span class="math inline">\(\bar y_{\cdot\cdot}\)</span> is the mean of all the observations across all treatment groups (the grand mean):
-<span class="math display">\[
-y_{\cdot\cdot}=\sum_{i=1}^a y_{i\cdot} = \sum_{i=1}^a\sum_{j=1}^n y_{ij} \quad\text{and} \quad \bar y_{\cdot\cdot} = \frac{y_{\cdot\cdot}}{N} \quad (N=a\times n).
-\]</span>
-The mean of the <span class="math inline">\(i\)</span>th treatment is just the deterministic component of the model, as discussed previously:
-<span class="math display">\[\mathbb{E}[y_{ij}] = \mu_i = \mu + \tau_i\]</span> for <span class="math inline">\(i = 1, 2,\ldots, a\)</span>. Note that under the null hypothesis of no treatment effect, the <span class="math inline">\(\tau_i=0\)</span> for all <span class="math inline">\(i\)</span> and the model reduces to:
-<span class="math display">\[
-y_{ij} = \mu +\varepsilon_{ij},
-\]</span>
-so that we can also think of significance testing as a model-comparison endevour (and this becomes natural down the track when we learn that these ANOVA-type models are examples of the broad class of general linear models, and that we can fit them using regression modelling techniques).</p>
-<div id="partitioning-the-total-sum-of-squares" class="section level3">
-<h3>Partitioning the total sum of squares</h3>
-<p>The name <strong>analysis of variance</strong> refers to the breaking apart (analysis) of the total variability (variance) in an experimental data set into component parts that can be attributed to (or explained by) either the random sampling variability, the treatments applied, or other local control factors (but this only enters into consideration when we start exercising local control through restricted randomisations in block designs). In the simple one-way analysis of variance for a completely randomised design, we are primarily concerned with partitioning the total variability into a component that is due to the applied treatments, and a component that’s due to the random sampling variability (or random error).</p>
-<p>As has already been discussed, the hypotheses we’re interested in testing are:
-<span class="math display">\[
-\begin{aligned}
-  H_0 &amp;: \tau_1 = \tau_2 =\ldots=\tau_a \\
-  H_1 &amp;: \tau_i \neq 0 \quad \text{for at least one } i .
-\end{aligned}
-\]</span></p>
-<p>Now, it turns out that we can get at a formal test for this hypothesis by estimating the variance <span class="math inline">\(\sigma^2\)</span> and by capitalising on Cochran’s theorem. Cochran’s theorem says that the sum of <span class="math inline">\(s\)</span> independent chi-square random variables:
-<span class="math display">\[  
-  \sum_{i=1}^s X_i
-\]</span>
-with <span class="math inline">\(X_i\sim \chi^2_{\nu_i} \quad (i=1, 2, \ldots, s)\)</span> is equal to the sum of <span class="math inline">\(\nu &gt; s\)</span> independent standard normal random variables:
-<span class="math display">\[
-  \sum_{k=1}^\nu Z_k,
-\]</span>
-with <span class="math inline">\(Z_k \sim NID(0, 1)\)</span> and <span class="math inline">\(v = \sum_{i=1}^s \nu_i\)</span>.</p>
-<p>Let’s look at the usual estimate of the variance <span class="math inline">\(\sigma^2\)</span>, as follows:
-<span class="math display">\[
- \hat\sigma^2 = \frac{1}{an - 1}\sum_{i=1}^a\sum_{j=1}^n (y_{ij} - \bar y_{\cdot\cdot})^2.
-\]</span>
-Replacing <span class="math inline">\(y_{ij}\)</span> with the model <span class="math inline">\(\mu + \tau_i +\varepsilon_{ij}\)</span> we get:
-<span class="math display">\[
- \hat\sigma^2 = \frac{1}{an - 1}\sum_{i=1}^a\sum_{j=1}^n (\mu + \tau_i +\varepsilon_{ij} - \bar y_{\cdot\cdot})^2,
-\]</span>
-which, with a little algebra gives rise to:
-[</p>
-<p>]</p>
-<p>One measure of the variability of a data set is given by the mean square error (MSE). We know that an estimate of the population mean and variance is given by the sample mean and sample variance, respectively:
-<span class="math display">\[
-\bar y = \frac{1}{n}\sum_{k=1}^K y_k \quad\text{and} \quad s^2 = \frac{1}{n-1}\sum_{k=1}^K (y_k - \bar y)^2.
-\]</span>
-Observe that the sum of squared deviations from the sample average forms a part of the equation for <span class="math inline">\(s^2\)</span>. Indeed, we could express this <strong>sum of squares</strong> as:
-<span class="math display">\[
-(n-1)s^2 = \sum_{k=1}^K (y_k - \bar y)^2.
-\]</span>
-In the context of the one-way ANOVA, this corresponds to computing the variability of the total data set without rehard for membership to a particular treatment group, viz. 
-<span class="math display">\[
-SS_T = (an-1)s^2 = \sum_{i=1}^a\sum_{j=1}^n (y_{ij}-\bar y_{\cdot\cdot})^2.
-\]</span>
-This is called the <strong>total corrected sum of squares</strong>, where the <em>corrected</em> bit refers to the fact that we are adding together squares that consist of a deviation from the grand mean, so each observed value is being “corrected” for the grand mean. Clearly this <span class="math inline">\(SS_T = (an-1)s^2\)</span> implicitly contains a measure of the total variability (i.e. <span class="math inline">\(s^2\)</span>). The idea of the one-way analysis of variance is to partition the total corrected sum of squares into a component that measures the variability <em>between</em> treatment means with respect to the grand mean (a treatment sum of squares) and a component that measures the variability of observations <em>within</em> a treatment with respect to that treatment’s mean (which can only be due to random error). There’s a “trick” to this that isn’t immediately obvious — one of the arithmetical magic tricks that I find myself constantly wishing someone, somewhere would stop reproducing blindly and actually explain where the insight comes from to do this. One day I hope to find out that insight, but for now, like all those others I’m just going to reproduce it faithfully. The trick is to do absolutely nothing to the equation by adding <span class="math inline">\(\bar y_{i\cdot}\)</span> and then subtracting <span class="math inline">\(\bar y_{i\cdot}\)</span> so that in effect merely <span class="math inline">\(0\)</span> has been added. Observe:
-<span class="math display">\[
-\begin{aligned}
-SS_T &amp;= \sum_{i=1}^a\sum_{j=1}^n (y_{ij}-\bar y_{\cdot\cdot} + \bar y_{i\cdot} - \bar y_{i\cdot})^2 \\
- &amp;= \sum_{i=1}^a\sum_{j=1}^n \big[(\bar y_{i\cdot} -\bar y_{\cdot\cdot}) + (y_{ij}  - \bar y_{i\cdot})\big]^2 \\
- &amp;= \sum_{i=1}^a\sum_{j=1}^n \big[(\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + (y_{ij}  - \bar y_{i\cdot})^2 + 2(\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot})\big] \\
- &amp;= \sum_{i=1}^a\sum_{j=1}^n (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n 2(\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) \\
- &amp;= n \sum_{i=1}^a (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2 + 2\sum_{i=1}^a\sum_{j=1}^n (\bar y_{i\cdot} -\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) \\
- &amp;= n \sum_{i=1}^a (\bar y_{i\cdot} -\bar y_{\cdot\cdot})^2 + \sum_{i=1}^a\sum_{j=1}^n (y_{ij}  - \bar y_{i\cdot})^2\\  &amp;= SS_\text{Trt} + SS_{E}
-\end{aligned}
-\]</span>
-Note that the cross-product term vanishes by equality with <span class="math inline">\(0\)</span>, since it can be written as:
-<span class="math display">\[
-\begin{aligned}
-  2\sum_{i=1}^a   \sum_{j=1}^n (\bar y_{i\cdot}-\bar y_{\cdot\cdot})(y_{ij}  - \bar y_{i\cdot}) &amp;= 2\sum_{i=1}^a \bigg[(\bar y_{i\cdot}-\bar y_{\cdot\cdot}) \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot}) \bigg] \\
-  &amp;= 2\sum_{i=1}^a \bigg[(\bar y_{i\cdot}-\bar y_{\cdot\cdot}) \bigg \{ \bigg(\sum_{j=1}^n y_{ij}\bigg) - n \bar y_{i\cdot}\bigg \}\bigg] \\
-\end{aligned}
-\]</span>
-and the factor within the curly braces is identically zero:
-<span class="math display">\[
-\begin{aligned}
- \bigg(\sum_{j=1}^n y_{ij}\bigg) - n \bar y_{i\cdot} &amp;= y_{i\cdot} - n \frac{y_{i\cdot}}{n} \\
- &amp;= y_{i\cdot} - y_{i\cdot} \\
- &amp;= 0
-\end{aligned}
-\]</span></p>
-<p>The point of this exercise in arithmetic is to show that the total variability in the data, as measured by the total corrected sum of squares, can be partitioned into a sum of squares of the differences between the treatment averages and the grand average, plus a sum of squares of the differences of observations within treatments from the treatment average. Now, the difference between the observed treatment averages and the grand average is a measure of the differences between treatment means, whereas the differences of observations within a treatment from the treatment average can be due only to random error. It’s appropriate at this point to discuss some commonly used terminology. We call <span class="math inline">\(SS_T\)</span>$ the total corrected sum of squares, while the term <span class="math inline">\(SS_{\text{Trt}}\)</span> is sometimes referred to as treatment sum of squares, the sum of squares due to treatments, or the between treatments sum of squares. The term <span class="math inline">\(SS_E\)</span> is called the sum of squares due to error, the error sum of squares, or the within treatments sum of squares. In the context of the regression approach to ANOVA, we speak of the sum of squares for residuals, or the residual sum of squares.</p>
-<p>When calculating the total corrected sum of squares we are free to choose whatever values of <span class="math inline">\(y_{ij}\)</span> we wish, just as long as they produce the value <span class="math inline">\(\bar y_{\cdot\cdot}= \frac{1}{an}\sum_{i}\sum_{j} y_{ij}\)</span>. A little thought tells us that of the <span class="math inline">\(N=an\)</span> observations, we are free to select any <span class="math inline">\(N-1 = an-1\)</span> of them, with the constraint that the <span class="math inline">\(N\)</span>th observation needs to be such that it leads to the set value of <span class="math inline">\(\bar y_{\cdot\cdot}\)</span>. We say that there are <span class="math inline">\(N-1 = an-1\)</span> degrees of freedom for <span class="math inline">\(SS_T\)</span>. Similarly when calculating the treatment sum of squares:
-<span class="math display">\[
-SS_\text{Trt} = n\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2
-\]</span>
-there are <span class="math inline">\(a\)</span> treatment means <span class="math inline">\(a-1\)</span> of which we are free to choose, so the treatment sum of squares has <span class="math inline">\(a-1\)</span> degrees of freedom. Finally, within each treatment group, there are <span class="math inline">\(n\)</span> values, of which can freely choose <span class="math inline">\(n-1\)</span> to compute the treatment mean. Then, since there are <span class="math inline">\(a\)</span> treatment groups, we have <span class="math inline">\(a(n-1) = an - a\)</span> degrees of freedom for error.</p>
-<p>It’s also important to look at the <span class="math inline">\(SS_\text{Trt}\)</span> and <span class="math inline">\(SS_E\)</span> terms a little more closely. Consider the error sum of squares:
-<span class="math display">\[
-\begin{aligned}
-SS_E &amp;= \sum_{i=1}^a \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot})^2 \\
-&amp;= \sum_{i=1}^a \bigg [\sum_{j=1}^n (y_{ij} - \bar y_{i\cdot})^2 \bigg ] \\
-&amp;= \sum_{i=1}^a (n-1)s_i^2.
-\end{aligned}
-\]</span></p>
-<p>It is clear that this explicitly contains estimates of the sample variance in the <span class="math inline">\(i\)</span>th treatment, for each of the <span class="math inline">\(a\)</span> treatments. We can combine these <span class="math inline">\(a\)</span> sample variances to obtain an estimate of the common population variance as follows:
+<div id="perform-the-one-way-anova-test" class="section level2">
+<h2>Perform the one-way ANOVA test</h2>
+<p>We want to know if there is any significant difference between the average seedling growth measure under each of the nematode treatments. The R function <code>aov()</code> can be used to carry out an ANOVA, while the function <code>summary.aov()</code> can be used to summarize the analysis of variance model. Morevoer, upon loading the <code>broom</code> package, the function <code>tidy()</code> can be used to coerce the output to a tibble for eas of access.</p>
+<pre class="r"><code># Carry out a one-way ANOVA
+m1_aov &lt;- aov(seedling_growth ~ nematode_density, data = my_data)
+
+# Summary of the analysis
+summary(m1_aov)</code></pre>
+<pre><code>##                  Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+## nematode_density  3 100.65   33.55   12.08 0.000616 ***
+## Residuals        12  33.33    2.78                     
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>To produce useful storage formats for the information from the ANOVA, do the following:</p>
+<pre class="r"><code>pacman::p_load(broom, janitor)
+
+m1_aov_modelstats &lt;- glance(m1_aov) %&gt;% clean_names()
+m1_aov_modelstats</code></pre>
+<pre><code>## # A tibble: 1 x 11
+##   r_squared adj_r_squared sigma statistic p_value    df log_lik   aic   bic
+##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     0.751         0.689  1.67      12.1 6.16e-4     4   -28.6  67.1  71.0
+## # ... with 2 more variables: deviance &lt;dbl&gt;, df_residual &lt;int&gt;</code></pre>
+<pre class="r"><code>m1_aov_coefstats &lt;- tidy(m1_aov) %&gt;% clean_names()
+m1_aov_coefstats</code></pre>
+<pre><code>## # A tibble: 2 x 6
+##   term                df sumsq meansq statistic   p_value
+##   &lt;chr&gt;            &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+## 1 nematode_density     3 101.   33.5       12.1  0.000616
+## 2 Residuals           12  33.3   2.78      NA   NA</code></pre>
+<pre class="r"><code>m1_aov_valuestats &lt;- augment(m1_aov) %&gt;% clean_names()
+m1_aov_valuestats</code></pre>
+<pre><code>## # A tibble: 16 x 9
+##    seedling_growth nematode_density fitted se_fit  resid   hat sigma  cooksd
+##              &lt;dbl&gt; &lt;ord&gt;             &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
+##  1            10.8 0                 10.6   0.833  0.150 0.25   1.74 9.00e-4
+##  2             9.1 0                 10.6   0.833 -1.55  0.250  1.65 9.61e-2
+##  3            13.5 0                 10.6   0.833  2.85  0.25   1.43 3.25e-1
+##  4             9.2 0                 10.6   0.833 -1.45  0.250  1.67 8.41e-2
+##  5            11.1 1000              10.4   0.833  0.675 0.25   1.72 1.82e-2
+##  6            11.1 1000              10.4   0.833  0.675 0.25   1.72 1.82e-2
+##  7             8.2 1000              10.4   0.833 -2.23  0.25   1.56 1.98e-1
+##  8            11.3 1000              10.4   0.833  0.875 0.25   1.71 3.06e-2
+##  9             5.4 5000               5.6   0.833 -0.200 0.25   1.74 1.60e-3
+## 10             4.6 5000               5.6   0.833 -1     0.25   1.71 4.00e-2
+## 11             7.4 5000               5.6   0.833  1.8   0.25   1.62 1.30e-1
+## 12             5   5000               5.6   0.833 -0.6   0.25   1.73 1.44e-2
+## 13             5.8 10000              5.45  0.833  0.35  0.25   1.74 4.90e-3
+## 14             5.3 10000              5.45  0.833 -0.15  0.25   1.74 9.00e-4
+## 15             3.2 10000              5.45  0.833 -2.25  0.25   1.55 2.03e-1
+## 16             7.5 10000              5.45  0.833  2.05  0.25   1.59 1.68e-1
+## # ... with 1 more variable: std_resid &lt;dbl&gt;</code></pre>
+</div>
+<div id="do-some-basic-post-analysis-checks-of-anova-assumptions" class="section level2">
+<h2>Do some basic post-analysis checks of ANOVA assumptions</h2>
+<p>The ANOVA test assumes that the data are normally distributed and the variance across groups is homogenous. Let’s check that these assumptions are valid.</p>
+<div id="check-the-assumption-of-homogeneity-of-variance" class="section level3">
+<h3>Check the assumption of homogeneity of variance</h3>
+<p>A plot of the residuals versus fitted values can be used to check the homogeneity of variances assumption.</p>
+<pre class="r"><code># 1. Homogeneity of variances
+plot(m1_aov, 1)</code></pre>
+<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>There is no major relationship between the residuals and the fitted values, and this indicates that the homogeneity of variance assumption is a relatively reasonable assumption to make.</p>
+<p>For further evidence, we can use the <code>leveneTest()</code> function from the <code>car</code> package to carry out a formal test for variance equality.</p>
+<pre class="r"><code>pacman::p_load(car)
+leveneTest(seedling_growth ~ nematode_density, data = my_data)</code></pre>
+<pre><code>## Levene&#39;s Test for Homogeneity of Variance (center = median)
+##       Df F value Pr(&gt;F)
+## group  3  0.3252 0.8072
+##       12</code></pre>
+<p>Since the p-value is quite large (0.8072) there is little evidence against the null hypothesis of equal variances across treatment groups. Hence, we are safe to assume homogeneity of variances across treatment groups.</p>
+</div>
+<div id="check-the-normality-assumption" class="section level3">
+<h3>Check the normality assumption</h3>
+<p>The plot below is a normal Q-Q plot, which shows the empirical quantiles of the residuals plotted against the theoretical quantiles of the normal distribution. A 45-degree reference line is also plotted, demonstrating what a perfect fit to a normal distribution would look like.</p>
+<pre class="r"><code>plot(m1_aov, 2)</code></pre>
+<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p>This shows us that the model (standardized) residuals are reasonably well modelled by an assumption of normality, since all the points fall approximately along the reference line.</p>
+<p>A Shapiro-Wilks test can be performed using <code>shapiro.test()</code> to formally test for normality.</p>
+<pre class="r"><code># Extract the residuals
+m1_aov_resids &lt;- residuals(object = m1_aov)
+
+# Shapiro-Wilk test
+shapiro.test(x = m1_aov_resids)</code></pre>
+<pre><code>## 
+##  Shapiro-Wilk normality test
+## 
+## data:  m1_aov_resids
+## W = 0.9713, p-value = 0.8592</code></pre>
+<p>The Shapiro-Wilk test leads to the same conclusion as the normal quantile plot, namely that the data are normally distributed (<span class="math inline">\(W = 0.97, \, p = 0.86\)</span>).</p>
+</div>
+</div>
+<div id="interpret-the-result-of-the-one-way-anova-tests" class="section level2">
+<h2>Interpret the result of the one-way ANOVA tests</h2>
+<p>The post-analysis checks of the anova model assumptions confirm that the assumptions are met reasonably well by the data. This gives us the green light to interpret the anova output. The p-value (<span class="math inline">\(\approx 0.0006\)</span>) of the ANOVA F-test is very small, indicating that the observing data as extreme as this under the null hypothesis is quite rare. This leads us to reject the null hypothesis and conclude that there is a difference in mean seedling growth between the different nematode density treatments.</p>
+</div>
+<div id="planned-contrasts-and-post-hoc-multiple-comparisons" class="section level2">
+<h2>Planned contrasts and post-hoc multiple comparisons</h2>
+<div id="specifying-contrasts-for-anova" class="section level3">
+<h3>Specifying contrasts for ANOVA</h3>
+<p>A one-way ANOVA F-test is an omnibus test: it tells us that there is a difference (or not) between the treatment means. We have to go further to determine which of the specific means differs from the others. Often we have planned comparisons to make. Because there are four levels of the factor, we can make a total of 3 orthogonal contrasts. So, for example, suppose that the researcher wishes to compare the mean of all the experimental treatments against the mean of the control. That is:
 <span class="math display">\[
 \begin{aligned}
-\frac{(n-1)s_1^2 + (n-1)s_2^2 + \cdots + (n-1)s_a^2}{(n-1)+(n-1)+\cdots +(n-1)} &amp;= \frac{\sum_{i=1}^a \bigg [ \sum_{j=1}^n (y_{ij} - \bar y_{i\cdot}) \bigg]}{\sum_{i=1}^a (n-1)} \\
-&amp;= \frac{SS_E}{a(n-1)}
+H_0 &amp;: \mu_1 - \frac{1}{3}(\mu_2 +\mu_3 +\mu_4) = 0 \\
+H_1 &amp;: \mu_1 - \frac{1}{3}(\mu_2 +\mu_3 +\mu_4) \neq 0.
 \end{aligned}
 \]</span>
-Thus, by dividing <span class="math inline">\(SS_E\)</span> by its degrees of freedom, we obtain an estimate of the common variance within each of the treatments.</p>
-<p>Similarly, in the case where the null hypothesis holds (i.e. when there is no difference between treatment means), we could also use the variation of the treatment averages from the grand average to estimate <span class="math inline">\(\sigma^2\)</span>. Specifically,
+This corresponds to a vector of contrast coefficients as shown:</p>
+<pre class="r"><code># Contrast 0 vs mean(1000, 5000, 10000)
+c1 &lt;- c(3, -1, -1, -1)</code></pre>
+<p>Suppose too that the researcher is interested in comparing the experimental treatments as lowest versus the mean of the two highest, and highest versus next-highest. That is:
 <span class="math display">\[
-\frac{SS_\text{Trt}}{a-1} = \frac{n\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2}{a-1}
-\]</span>
-is an estimate of <span class="math inline">\(\sigma^2\)</span> if the treatment means are equal. To see why this is the case, note that the quantity <span class="math inline">\(\sum_{i=1}^a (\bar y_{i\cdot} - \bar y_{\cdot\cdot})^2 /(a-1)\)</span> estimates <span class="math inline">\(\sigma^2 / n\)</span>, the variance of the treatment averages, so <span class="math inline">\(n\)</span> times that quantity must estimate <span class="math inline">\(\sigma^2\)</span> if there are no differences in treatment means.</p>
-<p>As a result of this analysis, we observe that the analysis of variance provides us with two estimates of <span class="math inline">\(\sigma^2\)</span> — one based on the inherent variability within treatments and one based on the variability between treatments. If there are no differences in the treatment means, we would expect these two estimates to be very similar. Indeed, if these two estimates are widely different, then it leads us to suspect that the observed differences must be caused by differences in the treatment means. We formalise this by considering the mean squares (i.e. the sums of squares divided by their respective degrees of freedom), as follows:
-<span class="math display">\[
-MS_\text{Trt} = \frac{SS_\text{Trt}}{a-1} \quad \text{and} \quad MS_E = \frac{SS_E}{a(n-1)}.
-\]</span>
-It is relatively easy to show that:
-<span class="math display">\[
-\mathbb E[MS_E] = \sigma^2
+\begin{aligned}
+H_0 &amp;: \mu_2 - \mu_3 = 0 \\
+H_1 &amp;: \mu_2 - \mu_3 \neq 0.
+\end{aligned}
 \]</span>
 and
 <span class="math display">\[
-\mathbb E[MS_\text{Trt}] = \sigma^2 + \frac{n\sum_{i=1}^a \tau_i^2} {a-1}.
+\begin{aligned}
+H_0 &amp;: \mu_3 - \mu_4) = 0 \\
+H_1 &amp;: \mu_3 - \mu_4) \neq 0.
+\end{aligned}
 \]</span>
-It is clear that if there are no differences in treatments, the <span class="math inline">\(\tau_i = 0\)</span> for all <span class="math inline">\(i\)</span> and the expected mean square for treatments reduces to <span class="math inline">\(\sigma^2\)</span> too. A test of the hypothesis of no difference in treatment means can be performed by comparing <span class="math inline">\(MS_\text{Trt}\)</span> and <span class="math inline">\(MS_E\)</span>. To do this we exploit the fact that we have assumed the <span class="math inline">\(\varepsilon_{ij}\)</span> to be normally and independently distributed according to a <span class="math inline">\(N(0, \sigma^2)\)</span>, so that <span class="math inline">\(y_{ij}\sim NID(\mu + \tau_i, \sigma^2)\)</span> and <span class="math inline">\(SS_T\)</span> is a sum of squares in normally distributed random variables and Cochran’s theorem indicates that <span class="math inline">\(\frac{SS_T}{\sigma^2} \sim \chi^2_{an-1}\)</span> (a chi-squared distribution on <span class="math inline">\(asn-1\)</span> degrees of freedom. .</p>
+These correspond to contrast coefficient vectors:</p>
+<pre class="r"><code># Contrast 1000 vs mean(5000, 10000) 
+c2 &lt;- c(0, 1, -1, 0)
+# Contrast 5000 vs 10000
+c3 &lt;- c(0, 0, 1, -1)</code></pre>
+<p>In R we need to set these individual contrasts up into a matrix of contrast coefficients and assign that matrix as the contrasts for the treatment variale of interest. We use <code>cbind()</code> to construct the contrast matrix with each of the planned contrasts being a column. We then use <code>contrasts()</code> to assign the contrasts to the treatment factor of interest in the data.</p>
+<pre class="r"><code># Build the contrast matrix
+contrast_matrix &lt;- cbind(c1, c2, c3)
+# Assign the contrast matrix to nematode_density treatment factor
+contrasts(my_data$nematode_density) &lt;- contrast_matrix</code></pre>
+<p>Now we need to fit a new ANOVA model using the <code>aov()</code> function. Because we have already defined the contrasts to use, we don’t need to do anything special to fit the model. R will just fit the model using those contrasts.</p>
+<pre class="r"><code># Fit an anova model
+m2_aov &lt;- aov(seedling_growth ~ nematode_density, data = my_data)</code></pre>
+<p>The special thing we do need to do is let R know how to output the results in the <code>summary.aov()</code> function. Because we have three contrasts, we need to tell <code>summary.aov()</code> to split the summary accordingly. We do this be creating a list of a list as follows:</p>
+<pre class="r"><code># How to split summary of results
+split_list &lt;- list(
+  nematode_density = list(
+    &quot;Control vs All Experimental&quot; = 1,
+    &quot;1000 vs 5000)&quot; = 2,
+    &quot;5000 vs 10000&quot; = 3))
+# Run summary.aov with that split list
+summary.aov(m2_aov, split = split_list)</code></pre>
+<pre><code>##                                                 Df Sum Sq Mean Sq F value
+## nematode_density                                 3 100.65   33.55  12.080
+##   nematode_density: Control vs All Experimental  1  36.58   36.58  13.169
+##   nematode_density: 1000 vs 5000)                1  46.56   46.56  16.765
+##   nematode_density: 5000 vs 10000                1  17.51   17.51   6.305
+## Residuals                                       12  33.33    2.78        
+##                                                   Pr(&gt;F)    
+## nematode_density                                0.000616 ***
+##   nematode_density: Control vs All Experimental 0.003457 ** 
+##   nematode_density: 1000 vs 5000)               0.001487 ** 
+##   nematode_density: 5000 vs 10000               0.027360 *  
+## Residuals                                                   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>The output shows that <code>nematode_density</code> is highly significant on 3 degrees of freedom (p = 0.00616), and then proceeds to split the treatment sum of squares up into the three single degree of freedom contrasts we defined. This tells us that there is a significant experimental effect since the average experimental treatment mean differs significantly from the control (p = 0.003457). It also informs us that there is a significant difference between the 1000 and 5000 nematode treatments (p = 0.001487) but the difference between the 5000 and the 10000 nematode density is far less significant (p = 0.02736). This indicates that the tomato seedlings can cope with some nematodes in the soil, but as the density increases from 1000 up to 5000 nematodes, something pathological takes place. The jump from 5000 to 1000 doesn’t appear to be as problematic though, indicating a kind of saturation threshold after which the seedling growth response is less sensitive to an increase in the nematode density. This is confirmed from our exploratory graphs created earlier.</p>
+</div>
+<div id="tukey-multiple-pairwise-comparisons" class="section level3">
+<h3>Tukey multiple pairwise-comparisons</h3>
+<p>We’ve only been able to test three orthogonal contrasts as planned comparisons. However, our study leads us to want to look at further tests. We can compute Tukey Honest Significant Differences (Tukey HSD) using the <code>TukeyHSD()</code> function, which takes a fitted ANOVA model as its argument.This computes all pairwise comparisons and provides Tukey-adjusted p-values to account for the fact that we are making multiple comparisons. We set the family-wise confidence level using the argument <code>conf.level</code>.</p>
+<pre class="r"><code>hsd &lt;- TukeyHSD(x = m1_aov,
+                ordered = TRUE,
+                conf.level = 0.95)
+hsd</code></pre>
+<pre><code>##   Tukey multiple comparisons of means
+##     95% family-wise confidence level
+##     factor levels have been ordered
+## 
+## Fit: aov(formula = seedling_growth ~ nematode_density, data = my_data)
+## 
+## $nematode_density
+##             diff       lwr      upr     p adj
+## 5000-10000 0.150 -3.348577 3.648577 0.9992199
+## 1000-10000 4.975  1.476423 8.473577 0.0056301
+## 0-10000    5.200  1.701423 8.698577 0.0040599
+## 1000-5000  4.825  1.326423 8.323577 0.0070131
+## 0-5000     5.050  1.551423 8.548577 0.0050470
+## 0-1000     0.225 -3.273577 3.723577 0.9973921</code></pre>
+<p>We can also use <code>plot()</code> to induce the base plot method for Tukey HSD comparisons, to get a visual comparison of means.</p>
+<pre class="r"><code>par(cex.axis = 0.5, mar = c(5, 5, 4, 2) + 0.1)
+plot(hsd, las = 2)</code></pre>
+<p><img src="/post/2020-03-19-a-single-factor-crd-and-the-one-way-analysis-of-variance_files/figure-html/unnamed-chunk-28-1.png" width="672" />
+This plot needs refinement before it can be used in a publication, but it is useful to get a quick feel for what the data indicates. Here we see that there is no significant difference between 0 and 1000 or 5000 and 10000. But the 0 vs. 5000, 0 vs. 10000, 1000 vs. 5000 and 1000 vs. 10000 comparisons are significantly different, as we have already seen from the orthogonal contrasts fit earlier.</p>
+</div>
+<div id="multiple-comparisons-using-multcomp-package" class="section level3">
+<h3>Multiple comparisons using multcomp package</h3>
+<p>There is a package called <code>multcomp</code> that is dedicated to multiple comparisons in linear models (as well as more general models). We use the <code>glht()</code> function, which stands for “general linear hypothesis tests”. The basic format is:</p>
+<pre class="r"><code>glht(model, lincft)</code></pre>
+<p>where <code>model</code> is a fitted model object (e.g. returned by <code>aov()</code>) and <code>lincft</code> specifies the linear hypotheses to be tested. Multiple comparisons in ANOVA models are specified by objects returned by the function <code>mcp()</code>. For example, to perform all pairwise comparisons using the Tukey method we would use the following code.</p>
+<pre class="r"><code>pacman::p_load(multcomp)
+
+glht_hsd &lt;- glht(model = m1_aov,
+     linfct = mcp(nematode_density = &quot;Tukey&quot;))
+summary(glht_hsd)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Multiple Comparisons of Means: Tukey Contrasts
+## 
+## 
+## Fit: aov(formula = seedling_growth ~ nematode_density, data = my_data)
+## 
+## Linear Hypotheses:
+##                   Estimate Std. Error t value Pr(&gt;|t|)   
+## 1000 - 0 == 0       -0.225      1.178  -0.191  0.99739   
+## 5000 - 0 == 0       -5.050      1.178  -4.285  0.00491 **
+## 10000 - 0 == 0      -5.200      1.178  -4.413  0.00385 **
+## 5000 - 1000 == 0    -4.825      1.178  -4.095  0.00723 **
+## 10000 - 1000 == 0   -4.975      1.178  -4.222  0.00571 **
+## 10000 - 5000 == 0   -0.150      1.178  -0.127  0.99922   
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>Simultaneous confidence intervals corresponding to comparisons are available via the <code>confint()</code> function:</p>
+<pre class="r"><code>ci95 &lt;- confint(glht_hsd)
+ci95</code></pre>
+<pre><code>## 
+##   Simultaneous Confidence Intervals
+## 
+## Multiple Comparisons of Means: Tukey Contrasts
+## 
+## 
+## Fit: aov(formula = seedling_growth ~ nematode_density, data = my_data)
+## 
+## Quantile = 2.9683
+## 95% family-wise confidence level
+##  
+## 
+## Linear Hypotheses:
+##                   Estimate lwr     upr    
+## 1000 - 0 == 0     -0.2250  -3.7228  3.2728
+## 5000 - 0 == 0     -5.0500  -8.5478 -1.5522
+## 10000 - 0 == 0    -5.2000  -8.6978 -1.7022
+## 5000 - 1000 == 0  -4.8250  -8.3228 -1.3272
+## 10000 - 1000 == 0 -4.9750  -8.4728 -1.4772
+## 10000 - 5000 == 0 -0.1500  -3.6478  3.3478</code></pre>
+<p>In addition, we can produce a compact letter display to show groups of signficant comparisons using <code>cld()</code>. This function can take the outputs of either <code>summary.glht()</code>, <code>glht()</code> or <code>confint.glht()</code> and obviously, for the latter, there is no need to define the confidence level since it is inherited from the confidence interval procedure. Let’s look at these now:</p>
+<pre class="r"><code>cld(object = glht_hsd,
+    level = 0.05,
+    decreasing = TRUE)</code></pre>
+<pre><code>##     0  1000  5000 10000 
+##   &quot;a&quot;   &quot;a&quot;   &quot;b&quot;   &quot;b&quot;</code></pre>
+<p>This readily shows what we have learned, namely that the 0 and 1000 treatments seem to sit in a single group, and the 5000 and 10000 treatments seem to sit their own group. It might be interesting to specifically make the contrast of the average of 0 and 1000 agains the average of 5000 and 10000, and then look at 0 vs 1000 and 5000 vs 10000. We can conduct contrast comparisons using <code>multcomp</code> too, as follows:</p>
+<pre class="r"><code># Set up contrasts
+c1 &lt;- c(1, -1, 0, 0)
+c2 &lt;- c(0.5, 0.5, -0.5, -0.5)
+c3 &lt;- c(0, 0, 1, -1)
+# Construct contrast matrix
+## NB. rbind not cbind for contrast matrices in multcomp:
+## A multcomp contrast matrix is the transpose of what 
+## would be given to contrasts() in the base aov() 
+## function. 
+new_contrast_matrix &lt;- rbind(c1, c2, c3) 
+row.names(new_contrast_matrix) = c(
+  &quot;0 - 1000&quot;,
+  &quot;(0,1000) - (5000,10000)&quot;,
+  &quot;5000 - 10000&quot;)
+
+glht_contrasts &lt;- glht(model = m1_aov,
+     linfct = mcp(nematode_density = new_contrast_matrix))
+summary(glht_contrasts)</code></pre>
+<pre><code>## 
+##   Simultaneous Tests for General Linear Hypotheses
+## 
+## Multiple Comparisons of Means: User-defined Contrasts
+## 
+## 
+## Fit: aov(formula = seedling_growth ~ nematode_density, data = my_data)
+## 
+## Linear Hypotheses:
+##                              Estimate Std. Error t value Pr(&gt;|t|)    
+## 0 - 1000 == 0                  0.2250     1.1784   0.191    0.996    
+## (0,1000) - (5000,10000) == 0   5.0125     0.8333   6.016   &lt;0.001 ***
+## 5000 - 10000 == 0              0.1500     1.1784   0.127    0.999    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## (Adjusted p values reported -- single-step method)</code></pre>
+<p>We can see that this explicitly shows the significant difference occurring between the 0 and 1000 group and the 5000 and 10000 group, as indicated by the lettering.</p>
+</div>
+<div id="pairwise-t-tests" class="section level3">
+<h3>Pairwise t-tests</h3>
+<p>There is also functionality in R to carry out pairwise t-tests with corrections for multiple testing, using the <code>pairwise.t.test()</code> function.</p>
+<pre class="r"><code>with(my_data,
+     pairwise.t.test(
+       x = seedling_growth, 
+       g = nematode_density,
+       p.adjust.method = &quot;BH&quot;,
+       pool.sd = TRUE))</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  seedling_growth and nematode_density 
+## 
+##       0      1000   5000  
+## 1000  0.9008 -      -     
+## 5000  0.0022 0.0022 -     
+## 10000 0.0022 0.0022 0.9008
+## 
+## P value adjustment method: BH</code></pre>
+<p>The result is a table of p-values for the pairwise comparisons, adjusted using the Benjamini-Hochberg method, which controls the false discovery rate — a less stringent condition than the familywise error rate, leading to a more powerful test. To control familywise error rate instead we could have used <code>p.adjust.method = "holm"</code> as a reasonable choice (although there are other methods too, see <code>? p.adjust</code> for details).</p>
 </div>
 </div>
-<div class="footnotes">
-<hr />
-<ol>
-<li id="fn1"><p>The 3rd edition of Montgomery’s popular book <em>Design and Analysis of Experiments</em><a href="#fnref1" class="footnote-back">↩︎</a></p></li>
-<li id="fn2"><p>A dated, but very readable 4th edition of the book <em>Statistics</em>.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
+<div id="what-to-do-if-the-anova-assumptions-are-not-valid" class="section level2">
+<h2>What to do if the ANOVA assumptions are not valid</h2>
+<p>When we look at the assumptions for ANOVA we may find that they are not valid.</p>
+<div id="heterogenous-variances" class="section level3">
+<h3>Heterogenous variances</h3>
+<ul>
+<li><strong>ANOVA test without homogeneity of variance assumption</strong></li>
+</ul>
+<p>An alternative ANOVA procedure for the one-way layout is the Welch one-way test accessible via <code>oneway.test()</code>.</p>
+<pre class="r"><code>oneway.test(seedling_growth ~ nematode_density, 
+            data = my_data)</code></pre>
+<pre><code>## 
+##  One-way analysis of means (not assuming equal variances)
+## 
+## data:  seedling_growth and nematode_density
+## F = 10.947, num df = 3.0000, denom df = 6.5645, p-value = 0.005904</code></pre>
+<p>Also, pairwise t-tests can be set to not use pooled standard deviation (<code>pool.sd = FALSE</code>) as a way of relaxing the assumption of variance homogeneity.</p>
+</div>
+<div id="and-distributions-not-normal" class="section level3">
+<h3>… and Distributions not normal</h3>
+<p>When the normality assumtion is not met it is a matter of judgement as to whether we can use ANOVA. The sensitivity to a lack of normality is less than it is to heterogenous variances or a lack of independence. However, we can employ a nonparametric approach for the one-way layout called the Kruskal-Wallis rank-sum test when the ANOVA assumptions are not met. In R we use the function <code>kruskal.test()</code> as follows:</p>
+<pre class="r"><code>kruskal.test(seedling_growth ~ nematode_density,
+             data = my_data)</code></pre>
+<pre><code>## 
+##  Kruskal-Wallis rank sum test
+## 
+## data:  seedling_growth by nematode_density
+## Kruskal-Wallis chi-squared = 11.355, df = 3, p-value = 0.009954</code></pre>
+<p>This shows a significant difference between the treatment medians.</p>
+</div>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<ol style="list-style-type: decimal">
+<li>Import your data</li>
+<li>Visualise your data with a view to assessing the ANOVA assumptions as far as you can.</li>
+<li>Perform one-way ANOVA test and check assumptions using residuals, residual plots and other tests.</li>
+<li>If the ANOVA assumptions are met and the ANOVA fit is signficant, carry out planned and post-hoc multiple comparisons (the most consistent approach is using the <code>multcomp</code> package). If the ANOVA assumptions are not met use Welch one-way test, or non-parameteric alternative, the Kruskal-Wallis rank sum test.</li>
+<li>Interpret the results.</li>
 </ol>
 </div>

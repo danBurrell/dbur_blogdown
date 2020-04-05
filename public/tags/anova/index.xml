@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2016. All rights reserved.</copyright>
-    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/anova/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,10 +15,10 @@
     <item>
       <title>A single factor CRD and the one-way analysis of variance</title>
       <link>/post/a-single-factor-crd-and-the-one-way-analysis-of-variance/</link>
-      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/post/a-single-factor-crd-and-the-one-way-analysis-of-variance/</guid>
-      <description>I’m currently teaching a class on the statistical design of experiments, and we’re using SPSS currently. Shortly we’d like to switch to using R as the main statistical computing package. I also have a client who has asked me to teach her how to use R to perform basic one-way and two-way analysis of variance for data arising from completely randomised designs with single factor and 2-factorial treatment structure. This is child’s play, especially in R, but I thought I’d take the opportunity to work through a couple of good examples and record them here for future use.</description>
+      <description>I’m currently teaching a class on the statistical design of experiments, and we’re using SPSS as the statistical software to implement basic analyses of data from designed experiments at the moment. Shortly we’d like to switch to using R as the main statistical computing package. I also have a client who has asked me to teach her how to use R to perform basic one-way and two-way analysis of variance for data arising from completely randomised designs with single factor and 2-factorial treatment structures, respectively.</description>
     </item>
     
   </channel>

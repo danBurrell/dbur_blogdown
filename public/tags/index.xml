@@ -7,7 +7,7 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2016. All rights reserved.</copyright>
-    <lastBuildDate>Thu, 19 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
@@ -15,9 +15,27 @@
     <item>
       <title>ANOVA</title>
       <link>/tags/anova/</link>
-      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/anova/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>CRD</title>
+      <link>/tags/crd/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/crd/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>DOE</title>
+      <link>/tags/doe/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/doe/</guid>
       <description></description>
     </item>
     
@@ -27,24 +45,6 @@
       <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/bayesian/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>CRD</title>
-      <link>/tags/crd/</link>
-      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/crd/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>DOE</title>
-      <link>/tags/doe/</link>
-      <pubDate>Thu, 19 Mar 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/doe/</guid>
       <description></description>
     </item>
     
