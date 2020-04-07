@@ -252,9 +252,15 @@
 <div id="a-dumb-approximation-of-pi" class="section level2">
 <h2>A dumb approximation of <span class="math inline">\(\pi\)</span></h2>
 <p>Here’s the basic idea. Take a unit circle, so that <span class="math inline">\(r=1\)</span> and compute the area:
+<<<<<<< HEAD
 <span class="math display">\[
 A = \pi\times r^2 = \pi\times 1^2 = \pi
 \]</span></p>
+=======
+[</p>
+<p>A = r^2 = 1^2 = 
+]</p>
+>>>>>>> 19eb911bfba6b808e726082828259331aa5ea2d2
 <p>In his talk Iain actually used a quarter sector of a unit circle, but this only means that he integrated from the centre out to the boundary and multiplied the result by 4, but it will work to take a full circle and integrate over <span class="math inline">\(-1 &lt; x &lt; 1\)</span> and <span class="math inline">\(-1 &lt; y &lt; 1\)</span> too.</p>
 <p>So we begin with a unit circle, but first let’s load the required packages.</p>
 <pre class="r"><code>if(!require(pacman)){install.packages(&quot;pacman&quot;)}</code></pre>
