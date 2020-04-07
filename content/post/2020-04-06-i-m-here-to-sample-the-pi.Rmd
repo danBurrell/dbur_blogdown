@@ -17,7 +17,6 @@ In the very small amount of spare time that I have available, I've been trying t
 
 Here's the basic idea. Take a unit circle, so that $r=1$ and compute the area:
 \[
-
 A = \pi\times r^2 = \pi\times 1^2 = \pi
 \]
 

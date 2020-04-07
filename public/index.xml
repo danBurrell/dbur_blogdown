@@ -13,6 +13,24 @@
     
     
     <item>
+      <title>A Bayesian ANOVA model</title>
+      <link>/post/a-bayesian-anova-model/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/a-bayesian-anova-model/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>I&#39;m here to sample the pi!</title>
+      <link>/post/i-m-here-to-sample-the-pi/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/i-m-here-to-sample-the-pi/</guid>
+      <description>In the very small amount of spare time that I have available, I’ve been trying to bring myself up to speed with Bayesian statistical models and in particular statistical sampling methods. As such I was watching this talk by Iain Murray on probabilistic modelling and I saw him explain the basics of Monte Carlo integration using a simple toy example of estimating the value of \(\pi\). Mind you, he gave that particular slide the title “A dumb approximation of \(\pi\)” because there are far better ways to do it.</description>
+    </item>
+    
+    <item>
       <title>A single factor CRD and the one-way analysis of variance</title>
       <link>/post/a-single-factor-crd-and-the-one-way-analysis-of-variance/</link>
       <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
