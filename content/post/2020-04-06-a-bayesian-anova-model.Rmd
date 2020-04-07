@@ -1,0 +1,14 @@
+---
+title: A Bayesian ANOVA model
+author: No Instance(s) Available.
+date: '2020-04-06'
+slug: a-bayesian-anova-model
+categories:
+  - Bayesian
+  - analysis of variance
+tags:
+  - Bayesian
+  - ANOVA
+description: ''
+topics: []
+---

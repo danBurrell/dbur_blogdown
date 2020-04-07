@@ -1,0 +1,212 @@
+---
+title: I'm here to sample the pi!
+author: No Instance(s) Available.
+date: '2020-04-06'
+slug: i-m-here-to-sample-the-pi
+categories:
+  - Monte Carlo methods
+tags:
+  - Monte Carlo Methods
+description: ''
+topics: []
+---
+
+In the very small amount of spare time that I have available, I've been trying to bring myself up to speed with Bayesian statistical models and in particular statistical sampling methods. As such I was watching [this talk](https://www.youtube.com/watch?v=khagz6yWL9w&list=PLqdbxUnkqOw2nKn7VxYqIrKWcqRkQYOsF&index=7) by Iain Murray on probabilistic modelling and I saw him explain the basics of Monte Carlo integration using a simple toy example of estimating the value of $\pi$. Mind you, he gave that particular slide the title "A dumb approximation of $\pi$" because there are far better ways to do it. Nonetheless, I thought I'd implement the method myself, just for the sake of implementing a simple Monte Carlo method. So, without further ado...
+
+## A dumb approximation of $\pi$
+
+Here's the basic idea. Take a unit circle, so that $r=1$ and compute the area:
+\[
+
+A = \pi\times r^2 = \pi\times 1^2 = \pi
+\]
+
+In his talk Iain actually used a quarter sector of a unit circle, but this only means that he integrated from the centre out to the boundary and multiplied the result by 4, but it will work to take a full circle and integrate over $-1 < x < 1$ and $-1 < y < 1$ too. 
+
+So we begin with a unit circle, but first let's load the required packages.
+```{r}
+if(!require(pacman)){install.packages("pacman")}
+pacman::p_load(tidyverse, gridExtra, ggpubr)
+```
+
+```{r, echo=FALSE}
+# A function to compute a circle
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+    x <- xc + r*cos(seq(0, pi, length.out=100))
+    ymax <- yc + r*sin(seq(0, pi, length.out=100))
+    ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+    annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
+#Construct the circle
+dat <- tibble(x = 0:1,
+              y = 0:1)
+
+circle <- ggplot(data = dat, 
+                 mapping = aes(x=x, y=y)) +
+    gg_circle(r = 1, 
+              xc = 0, 
+              yc = 0, 
+              color="cyan", 
+              fill="cyan") +
+     coord_equal(ratio = 1)
+
+circle
+```
+
+But, we're going to look at the situation slightly differently. Consider randomly tossing needles on the square defined by $-1<x<1$ and $-1<y<1$, and counting the number of needles that fall within the unit circle. Think about the ratio of these two areas: the area of the circle $A_c$ and the are of the square $A_s$. Then the ratio of the area of the circle with radius $r$ to the area of the square with side of length $2r$ we get:
+\[
+\frac{A_c}{A_s} = \frac{\pi r^2}{(2r)^2}=\frac{\pi}{4}.
+\]
+So, if we're considering a unit circle $(r=1)$ centered at the origin and the square with side lengths $s=2r=2$, also centered at the origin, then we should be able keep track of the number of needles that fall inside the circle and the number that fall outside in the enveloping square. Then by multiplying the ratio of the internal to external needles by 4 we should be able to estimate the value of $\pi$. Certainly, we expect that:
+\[
+4\bigg[\lim_{n\rightarrow \infty} \frac{A^{(n)}_c}{A^{(n)}_s} \bigg] = \pi.
+\]
+
+We will set up a Monte Carlo sampling scheme, as follows: first set $A_c^{(0)}= A_s^{(0)}=0$ and then for $n\in \mathbb Z, 1 \leq n \leq N$ sample:
+\[
+\begin{aligned}
+x^{(n)} &\sim U(-1,1) \\
+y^{(n)}& \sim U(-1,1)
+\end{aligned}
+\]
+if $x^2 + y^2 \leq 1$ then set $A_c^{(n)}=A^{(n-1)}+1$ and if $x^2 + y^2 > 1$ then set $A_s^{(n)}=A^{(n-1)}+1$. Compute the quantity
+\[
+P^{(n)} = 4\times \frac{A_c^{(n)}}{A_s^{(n)}},
+\]
+then plot the quantity $P^{(n)}$ against $n$ until the ratio converges (and we expect it to converge to $\pi$). I coded this up into a function called `monte_pi()` which has the circle function `gg_circle()` embedded within. The `monte_pi()` functions takes the number of `samples` as an argument and returns side-by-side plots of the monte carlo simulation results. The left-hand plot shows the actual samples points coloured according to whether they fall inside the unit circle or outside it. The right-hand plot shows the value of the proportion of points falling inside the circle to the total number of points multiplied by a factor of 4, that is, the running estimate of $P^{(n)} = 4\cdot  \frac{A^{(n)}_c}{A^{(n)}_s}\approx \pi$.   
+
+```{r}
+monte_pi <- function(samples = 10, seed = 25, ...){
+    
+    if(!require(pacman)){install.packages(pacman)}
+    pacman::p_load(tidyverse, gridExtra)
+    set.seed(seed)
+    monte_dat <- tibble(
+        x = runif(n = samples, min = -1, max = 1),
+        y = runif(n = samples, min = -1, max = 1),
+        d = sqrt(x^2 + y^2),
+        n = 1:samples
+) %>%
+    mutate(inside = ifelse(d <= 1, 1, 0),
+           num_in = cumsum(inside),
+           prop = 4*(num_in/n))
+
+# A function to compute a circle
+gg_circle <- function(r, xc, yc, color="black", fill=NA, ...) {
+    x <- xc + r*cos(seq(0, pi, length.out=100))
+    ymax <- yc + r*sin(seq(0, pi, length.out=100))
+    ymin <- yc + r*sin(seq(0, -pi, length.out=100))
+    annotate("ribbon", x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
+#Construct the circle
+circ_dat <- tibble(x = 0:1,
+              y = 0:1)
+
+circle <- ggplot(
+    data = circ_dat, 
+    mapping = aes(x=x, y=y)) +
+    gg_circle(r = 1, 
+              xc = 0, 
+              yc = 0, 
+              color="#F8F8FF", 
+              fill="#F8F8FF") +
+    geom_point(
+        data = monte_dat,
+        mapping = aes(x = x, 
+                      y = y, 
+                      colour = factor(inside), 
+                      fill = factor(inside))) +
+    theme(legend.position="none") +
+    coord_equal(ratio = 1) +
+    scale_colour_manual(values = c("red", "blue"))
+
+dynamics <- ggplot(
+    data = monte_dat,
+    mapping = aes(x = n, y = prop)) +
+    geom_hline(yintercept = pi, linetype="dashed", color = "magenta", size=1.2) +
+    geom_line(color = "blue") +
+    ylab(expression(P^{(n)})) +
+    theme(axis.text.y = element_text(angle = 0))
+
+out_plot <- arrangeGrob(circle, dynamics, ncol = 2)
+monte_pi_out <- list(df = monte_dat, p = out_plot)
+return(monte_pi_out)
+}
+```
+Let's see how well we've done. For `samples = 10` we get:
+```{r}
+mp10 <- monte_pi(samples = 10)
+as_ggplot(mp10$p)
+```
+with $P^{(10)}=$ `r mp10$df$prop[10]`. Increasing the number of samples to 30, we have:
+```{r}
+mp30 <- monte_pi(samples = 30)
+as_ggplot(mp30$p)
+```
+with $P^{(30)}=$ `r mp30$df$prop[30]`. Increasing to 100 samples, we get:
+```{r}
+mp100 <- monte_pi(samples = 100)
+as_ggplot(mp100$p)
+```
+with $P^{(100)}=$ `r mp100$df$prop[100]`. Increasing to 300 samples, we get:
+```{r}
+mp300 <- monte_pi(samples = 300)
+as_ggplot(mp300$p)
+```
+with $P^{(300)}=$ `r mp300$df$prop[300]`. Increasing to 500 samples, we get:
+```{r}
+mp500 <- monte_pi(samples = 500)
+as_ggplot(mp500$p)
+```
+with $P^{(500)}=$ `r mp500$df$prop[500]`. Increasing to 1500 samples, we get:
+```{r}
+mp1500 <- monte_pi(samples = 1500)
+as_ggplot(mp1500$p)
+```
+with $P^{(1500)}=$ `r mp1500$df$prop[1500]`. Increasing to 5000 samples, we get:
+```{r}
+mp5000 <- monte_pi(samples = 5000)
+as_ggplot(mp5000$p)
+```
+with $P^{(5000)}=$ `r mp5000$df$prop[5000]`. That's a relative error of the order of `r ((mp5000$df$prop[5000] - pi)/pi)*100` percent. That's not too bad, for a "dumb way to estimate $\pi$". Let's see what happens when we use 50000 samples. We get:
+```{r}
+mp50000 <- monte_pi(samples = 50000)
+as_ggplot(mp50000$p)
+```
+with $P^{(50000)}=$ `r mp50000$df$prop[50000]`. That's a relative error of the order of `r ((mp50000$df$prop[50000] - pi)/pi)*100` percent.
+
+## Capturing the uncertainty in our estimator. 
+Let's now construct a density plot of the distribution of the estimator $P^{(n)}$ for $n=1500$, using $N=2500$ repeated runs of the `monte_pi()` function to get a feel for the uncertainty associated with the estimator.
+
+```{r, cache=TRUE}
+N <- 2500
+pi_estimate <- rep(NA, times = N)
+for(i in 1:N){
+    s <- runif(1, min = 1, max = 100000)
+    mp <- monte_pi(samples = 1500, seed = s)
+    pi_estimate[i] <- mp$df$prop[1500]
+}
+```
+The above generates the sample of estimates of pi. Yhe density plot of the output is as follows:
+```{r}
+dat <- tibble(pi_estimate)
+xlabel <- "Estimate of pi"
+ylabel <- "Density"
+maintitle <- "Density of expression(P^1500) based on 2500 runs"
+
+ggplot(dat, aes(x = pi_estimate)) +
+    geom_density(aes(y = ..density..), fill = "#4271AE", colour = "#1F3552") +
+    geom_rug() +
+    geom_vline(xintercept = pi, colour = "red", linetype = "dashed", size = 1.2) +
+    labs(x = xlabel, y = ylabel, title = maintitle)
+```
+This output is really interesting. It indicates that this naive monte carlo sampling method appears to concentrate probability mass around the $3.14159\ldots$ value (i.e. the "exact" value) of $\pi$, but this method still leaves us with quite a degree of uncertainty about the true value of $\pi$. A 95% central probability interval is given as:
+```{r}
+q <- quantile(x = pi_estimate,
+         probs = c(0.025, 0.975))
+q
+```
+which indicates that if we didn't know the value of pi, values between `r q[["2.5%"]]` and `r q[["97.5%"]]` are reasonably credible. Of course the true valu does lie within this region, and the mode of the distribution is
+`r mode(pi_estimate)`. Similarly the mean is `r mean(pi_estimate)` and the median is `r median(pi_estimate)`. I suppose this is doing a reasonable job, but we could probably do far better too. Perhaps this is why Iain Murray calls this "a dumb approximation of $\pi$!"
