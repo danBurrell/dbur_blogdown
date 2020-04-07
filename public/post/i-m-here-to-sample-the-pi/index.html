@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="generator" content="Hugo 0.67.1" />
+
+  <title>I&#39;m here to sample the pi! &middot; Dandelbrot</title>
+
+    
+
+  
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/pure-min.css">
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-old-ie-min.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pure/1.0.0/grids-responsive-min.css">
+  <!--<![endif]-->
+
+  <!--[if lte IE 8]>
+  <link rel="stylesheet" href="/css/side-menu-old-ie.css">
+  <![endif]-->
+  <!--[if gt IE 8]><!-->
+  <link rel="stylesheet" href="/css/side-menu.css">
+  <!--<![endif]-->
+
+  <link rel="stylesheet" href="/css/blackburn.css">
+
+  
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.9.0/css/all.css">
+
+  
+  <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet" type="text/css">
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+ 
+  
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/androidstudio.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+
+  <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon" />
+
+  
+  
+
+</head>
+
+
+<body>
+<div id="layout">
+
+  
+<a href="#menu" id="menuLink" class="menu-link">
+  
+  <span></span>
+</a>
+<div id="menu">
+
+  
+  <a class="pure-menu-heading brand" href="/">Dandelbrot</a>
+
+
+  <div class="pure-menu">
+    <ul class="pure-menu-list">
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/"><i class='fa fa-home fa-fw'></i>Home</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/post/"><i class='fa fa-list fa-fw'></i>Posts</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/about/"><i class='fa fa-user fa-fw'></i>About</a>
+      
+        </li>
+      
+      
+        <li class="pure-menu-item">
+          <a class="pure-menu-link" href="/contact/"><i class='fa fa-phone fa-fw'></i>Contact</a>
+      
+        </li>
+      
+    </ul>
+  </div>
+
+  <div class="pure-menu social">
+  <ul class="pure-menu-list">
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://twitter.com/dandelbrot" rel="me" target="_blank"><i class="fab fa-twitter-square fa-fw"></i>Twitter</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://github.com/danBurrell" rel="me" target="_blank"><i class="fab fa-github-square fa-fw"></i>GitHub</a>
+    </li>
+    
+
+    
+
+    
+
+    
+    <li class="pure-menu-item">
+      <a class="pure-menu-link" href="https://stackoverflow.com/users/dandelbrot" rel="me" target="_blank"><i class="fab fa-stack-overflow fa-fw"></i>Stack Overflow</a>
+    </li>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+  </ul>
+</div>
+
+
+  <div>
+  <div class="small-print">
+    <small>&copy; 2016. All rights reserved.</small>
+  </div>
+  <div class="small-print">
+    <small>Built with&nbsp;<a href="https://gohugo.io/" target="_blank">Hugo</a></small>
+    <small>Theme&nbsp;<a href="https://github.com/yoshiharuyamashita/blackburn" target="_blank">Blackburn</a></small>
+  </div>
+</div>
+
+</div>
+
+
+  <div id="main">
+
+
+<div class="header">
+  <h1>I&#39;m here to sample the pi!</h1>
+  <h2></h2>
+</div>
+<div class="content">
+
+  <div class="post-meta">
+
+  <div>
+    <i class="fa fa-calendar fa-fw"></i>
+    <time>06 Apr 2020, 00:00</time>
+  </div>
+
+  
+
+  
+  
+  
+  
+
+  
+  
+  
+  <div>
+    <i class="fa fa-tags fa-fw"></i>
+    
+      <a class="post-taxonomy-tag" href="/tags/monte-carlo-methods">Monte Carlo Methods</a>
+    
+  </div>
+  
+  
+
+</div>
+
+  
+
+
+<p>In the very small amount of spare time that I have available, I’ve been trying to bring myself up to speed with Bayesian statistical models and in particular statistical sampling methods. As such I was watching <a href="https://www.youtube.com/watch?v=khagz6yWL9w&amp;list=PLqdbxUnkqOw2nKn7VxYqIrKWcqRkQYOsF&amp;index=7">this talk</a> by Iain Murray on probabilistic modelling and I saw him explain the basics of Monte Carlo integration using a simple toy example of estimating the value of <span class="math inline">\(\pi\)</span>. Mind you, he gave that particular slide the title “A dumb approximation of <span class="math inline">\(\pi\)</span>” because there are far better ways to do it. Nonetheless, I thought I’d implement the method myself, just for the sake of implementing a simple Monte Carlo method. So, without further ado…</p>
+<div id="a-dumb-approximation-of-pi" class="section level2">
+<h2>A dumb approximation of <span class="math inline">\(\pi\)</span></h2>
+<p>Here’s the basic idea. Take a unit circle, so that <span class="math inline">\(r=1\)</span> and compute the area:
+[</p>
+<p>A = r^2 = 1^2 = 
+]</p>
+<p>In his talk Iain actually used a quarter sector of a unit circle, but this only means that he integrated from the centre out to the boundary and multiplied the result by 4, but it will work to take a full circle and integrate over <span class="math inline">\(-1 &lt; x &lt; 1\)</span> and <span class="math inline">\(-1 &lt; y &lt; 1\)</span> too.</p>
+<p>So we begin with a unit circle, but first let’s load the required packages.</p>
+<pre class="r"><code>if(!require(pacman)){install.packages(&quot;pacman&quot;)}</code></pre>
+<pre><code>## Loading required package: pacman</code></pre>
+<pre class="r"><code>pacman::p_load(tidyverse, gridExtra, ggpubr)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>But, we’re going to look at the situation slightly differently. Consider randomly tossing needles on the square defined by <span class="math inline">\(-1&lt;x&lt;1\)</span> and <span class="math inline">\(-1&lt;y&lt;1\)</span>, and counting the number of needles that fall within the unit circle. Think about the ratio of these two areas: the area of the circle <span class="math inline">\(A_c\)</span> and the are of the square <span class="math inline">\(A_s\)</span>. Then the ratio of the area of the circle with radius <span class="math inline">\(r\)</span> to the area of the square with side of length <span class="math inline">\(2r\)</span> we get:
+<span class="math display">\[
+\frac{A_c}{A_s} = \frac{\pi r^2}{(2r)^2}=\frac{\pi}{4}.
+\]</span>
+So, if we’re considering a unit circle <span class="math inline">\((r=1)\)</span> centered at the origin and the square with side lengths <span class="math inline">\(s=2r=2\)</span>, also centered at the origin, then we should be able keep track of the number of needles that fall inside the circle and the number that fall outside in the enveloping square. Then by multiplying the ratio of the internal to external needles by 4 we should be able to estimate the value of <span class="math inline">\(\pi\)</span>. Certainly, we expect that:
+<span class="math display">\[
+4\bigg[\lim_{n\rightarrow \infty} \frac{A^{(n)}_c}{A^{(n)}_s} \bigg] = \pi.
+\]</span></p>
+<p>We will set up a Monte Carlo sampling scheme, as follows: first set <span class="math inline">\(A_c^{(0)}= A_s^{(0)}=0\)</span> and then for <span class="math inline">\(n\in \mathbb Z, 1 \leq n \leq N\)</span> sample:
+<span class="math display">\[
+\begin{aligned}
+x^{(n)} &amp;\sim U(-1,1) \\
+y^{(n)}&amp; \sim U(-1,1)
+\end{aligned}
+\]</span>
+if <span class="math inline">\(x^2 + y^2 \leq 1\)</span> then set <span class="math inline">\(A_c^{(n)}=A^{(n-1)}+1\)</span> and if <span class="math inline">\(x^2 + y^2 &gt; 1\)</span> then set <span class="math inline">\(A_s^{(n)}=A^{(n-1)}+1\)</span>. Compute the quantity
+<span class="math display">\[
+P^{(n)} = 4\times \frac{A_c^{(n)}}{A_s^{(n)}},
+\]</span>
+then plot the quantity <span class="math inline">\(P^{(n)}\)</span> against <span class="math inline">\(n\)</span> until the ratio converges (and we expect it to converge to <span class="math inline">\(\pi\)</span>). I coded this up into a function called <code>monte_pi()</code> which has the circle function <code>gg_circle()</code> embedded within. The <code>monte_pi()</code> functions takes the number of <code>samples</code> as an argument and returns side-by-side plots of the monte carlo simulation results. The left-hand plot shows the actual samples points coloured according to whether they fall inside the unit circle or outside it. The right-hand plot shows the value of the proportion of points falling inside the circle to the total number of points multiplied by a factor of 4, that is, the running estimate of <span class="math inline">\(P^{(n)} = 4\cdot \frac{A^{(n)}_c}{A^{(n)}_s}\approx \pi\)</span>.</p>
+<pre class="r"><code>monte_pi &lt;- function(samples = 10, seed = 25, ...){
+    
+    if(!require(pacman)){install.packages(pacman)}
+    pacman::p_load(tidyverse, gridExtra)
+    set.seed(seed)
+    monte_dat &lt;- tibble(
+        x = runif(n = samples, min = -1, max = 1),
+        y = runif(n = samples, min = -1, max = 1),
+        d = sqrt(x^2 + y^2),
+        n = 1:samples
+) %&gt;%
+    mutate(inside = ifelse(d &lt;= 1, 1, 0),
+           num_in = cumsum(inside),
+           prop = 4*(num_in/n))
+
+# A function to compute a circle
+gg_circle &lt;- function(r, xc, yc, color=&quot;black&quot;, fill=NA, ...) {
+    x &lt;- xc + r*cos(seq(0, pi, length.out=100))
+    ymax &lt;- yc + r*sin(seq(0, pi, length.out=100))
+    ymin &lt;- yc + r*sin(seq(0, -pi, length.out=100))
+    annotate(&quot;ribbon&quot;, x=x, ymin=ymin, ymax=ymax, color=color, fill=fill, ...)
+}
+
+#Construct the circle
+circ_dat &lt;- tibble(x = 0:1,
+              y = 0:1)
+
+circle &lt;- ggplot(
+    data = circ_dat, 
+    mapping = aes(x=x, y=y)) +
+    gg_circle(r = 1, 
+              xc = 0, 
+              yc = 0, 
+              color=&quot;#F8F8FF&quot;, 
+              fill=&quot;#F8F8FF&quot;) +
+    geom_point(
+        data = monte_dat,
+        mapping = aes(x = x, 
+                      y = y, 
+                      colour = factor(inside), 
+                      fill = factor(inside))) +
+    theme(legend.position=&quot;none&quot;) +
+    coord_equal(ratio = 1) +
+    scale_colour_manual(values = c(&quot;red&quot;, &quot;blue&quot;))
+
+dynamics &lt;- ggplot(
+    data = monte_dat,
+    mapping = aes(x = n, y = prop)) +
+    geom_hline(yintercept = pi, linetype=&quot;dashed&quot;, color = &quot;magenta&quot;, size=1.2) +
+    geom_line(color = &quot;blue&quot;) +
+    ylab(expression(P^{(n)})) +
+    theme(axis.text.y = element_text(angle = 0))
+
+out_plot &lt;- arrangeGrob(circle, dynamics, ncol = 2)
+monte_pi_out &lt;- list(df = monte_dat, p = out_plot)
+return(monte_pi_out)
+}</code></pre>
+<p>Let’s see how well we’ve done. For <code>samples = 10</code> we get:</p>
+<pre class="r"><code>mp10 &lt;- monte_pi(samples = 10)
+as_ggplot(mp10$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+with <span class="math inline">\(P^{(10)}=\)</span> 3.2. Increasing the number of samples to 30, we have:</p>
+<pre class="r"><code>mp30 &lt;- monte_pi(samples = 30)
+as_ggplot(mp30$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-5-1.png" width="672" />
+with <span class="math inline">\(P^{(30)}=\)</span> 3.2. Increasing to 100 samples, we get:</p>
+<pre class="r"><code>mp100 &lt;- monte_pi(samples = 100)
+as_ggplot(mp100$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-6-1.png" width="672" />
+with <span class="math inline">\(P^{(100)}=\)</span> 3.12. Increasing to 300 samples, we get:</p>
+<pre class="r"><code>mp300 &lt;- monte_pi(samples = 300)
+as_ggplot(mp300$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-7-1.png" width="672" />
+with <span class="math inline">\(P^{(300)}=\)</span> 3.04. Increasing to 500 samples, we get:</p>
+<pre class="r"><code>mp500 &lt;- monte_pi(samples = 500)
+as_ggplot(mp500$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+with <span class="math inline">\(P^{(500)}=\)</span> 3.12. Increasing to 1500 samples, we get:</p>
+<pre class="r"><code>mp1500 &lt;- monte_pi(samples = 1500)
+as_ggplot(mp1500$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+with <span class="math inline">\(P^{(1500)}=\)</span> 3.1386667. Increasing to 5000 samples, we get:</p>
+<pre class="r"><code>mp5000 &lt;- monte_pi(samples = 5000)
+as_ggplot(mp5000$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-10-1.png" width="672" />
+with <span class="math inline">\(P^{(5000)}=\)</span> 3.1528. That’s a relative error of the order of 0.3567409 percent. That’s not too bad, for a “dumb way to estimate <span class="math inline">\(\pi\)</span>”. Let’s see what happens when we use 50000 samples. We get:</p>
+<pre class="r"><code>mp50000 &lt;- monte_pi(samples = 50000)
+as_ggplot(mp50000$p)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+with <span class="math inline">\(P^{(50000)}=\)</span> 3.15392. That’s a relative error of the order of 0.3923916 percent.</p>
+</div>
+<div id="capturing-the-uncertainty-in-our-estimator." class="section level2">
+<h2>Capturing the uncertainty in our estimator.</h2>
+<p>Let’s now construct a density plot of the distribution of the estimator <span class="math inline">\(P^{(n)}\)</span> for <span class="math inline">\(n=1500\)</span>, using <span class="math inline">\(N=2500\)</span> repeated runs of the <code>monte_pi()</code> function to get a feel for the uncertainty associated with the estimator.</p>
+<pre class="r"><code>N &lt;- 2500
+pi_estimate &lt;- rep(NA, times = N)
+for(i in 1:N){
+    s &lt;- runif(1, min = 1, max = 100000)
+    mp &lt;- monte_pi(samples = 1500, seed = s)
+    pi_estimate[i] &lt;- mp$df$prop[1500]
+}</code></pre>
+<p>The above generates the sample of estimates of pi. Yhe density plot of the output is as follows:</p>
+<pre class="r"><code>dat &lt;- tibble(pi_estimate)
+xlabel &lt;- &quot;Estimate of pi&quot;
+ylabel &lt;- &quot;Density&quot;
+maintitle &lt;- &quot;Density of expression(P^1500) based on 2500 runs&quot;
+
+ggplot(dat, aes(x = pi_estimate)) +
+    geom_density(aes(y = ..density..), fill = &quot;#4271AE&quot;, colour = &quot;#1F3552&quot;) +
+    geom_rug() +
+    geom_vline(xintercept = pi, colour = &quot;red&quot;, linetype = &quot;dashed&quot;, size = 1.2) +
+    labs(x = xlabel, y = ylabel, title = maintitle)</code></pre>
+<p><img src="/post/2020-04-06-i-m-here-to-sample-the-pi_files/figure-html/unnamed-chunk-13-1.png" width="672" />
+This output is really interesting. It indicates that this naive monte carlo sampling method appears to concentrate probability mass around the <span class="math inline">\(3.14159\ldots\)</span> value (i.e. the “exact” value) of <span class="math inline">\(\pi\)</span>, but this method still leaves us with quite a degree of uncertainty about the true value of <span class="math inline">\(\pi\)</span>. A 95% central probability interval is given as:</p>
+<pre class="r"><code>q &lt;- quantile(x = pi_estimate,
+         probs = c(0.025, 0.975))
+q</code></pre>
+<pre><code>##     2.5%    97.5% 
+## 3.069333 3.245333</code></pre>
+<p>which indicates that if we didn’t know the value of pi, values between 3.0693333 and 3.2453333 are reasonably credible. Of course the true valu does lie within this region, and the mode of the distribution is
+numeric. Similarly the mean is 3.1408117 and the median is 3.1413333. I suppose this is doing a reasonable job, but we could probably do far better too. Perhaps this is why Iain Murray calls this “a dumb approximation of <span class="math inline">\(\pi\)</span>!”</p>
+</div>
+
+  
+  <h4><i class="fa-share-alt" aria-hidden="true"></i>&nbsp;Share!</h4>
+<ul class="share-buttons">
+	<li><a href="https://www.facebook.com/sharer/sharer.php?u=%2fpost%2fi-m-here-to-sample-the-pi%2f" target="_blank" title="Share on Facebook"><i class="fa-facebook" aria-hidden="true"></i><span class="sr-only">Share on Facebook</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="https://twitter.com/intent/tweet?source=%2fpost%2fi-m-here-to-sample-the-pi%2f&via=HorribleGeek" target="_blank" title="Tweet"><i class="fa-twitter" aria-hidden="true"></i><span class="sr-only">Tweet</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="https://plus.google.com/share?url=%2fpost%2fi-m-here-to-sample-the-pi%2f" target="_blank" title="Share on Google+"><i class="fa-google-plus" aria-hidden="true"></i><span class="sr-only">Share on Google+</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://www.tumblr.com/share?v=3&u=%2fpost%2fi-m-here-to-sample-the-pi%2f" target="_blank" title="Post to Tumblr"><i class="fa-tumblr" aria-hidden="true"></i><span class="sr-only">Post to Tumblr</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://pinterest.com/pin/create/button/?url=%2fpost%2fi-m-here-to-sample-the-pi%2f" target="_blank" title="Pin it"><i class="fa-pinterest-p" aria-hidden="true"></i><span class="sr-only">Pin it</span></a>
+	</li>&nbsp;&nbsp;&nbsp;
+	<li><a href="http://www.reddit.com/submit?url=%2fpost%2fi-m-here-to-sample-the-pi%2f" target="_blank" title="Submit to Reddit"><i class="fa-reddit-alien" aria-hidden="true"></i><span class="sr-only">Submit to Reddit</span></a>
+	</li>
+</ul>
+
+
+<style>
+	ul.share-buttons{
+	  list-style: none;
+	  padding: 0;
+	}
+
+	ul.share-buttons li{
+	  display: inline;
+	}
+
+	ul.share-buttons .sr-only{
+	  position: absolute;
+	  clip: rect(1px 1px 1px 1px);
+	  clip: rect(1px, 1px, 1px, 1px);
+	  padding: 0;
+	  border: 0;
+	  height: 1px;
+	  width: 1px;
+	  overflow: hidden;
+	}
+</style>
+
+
+  
+<div class="prev-next-post pure-g">
+  <div class="pure-u-1-24" style="text-align: left;">
+    
+    <a href="/post/a-single-factor-crd-and-the-one-way-analysis-of-variance/"><i class="fa fa-chevron-left"></i></a>
+    
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="prev">
+      <a href="/post/a-single-factor-crd-and-the-one-way-analysis-of-variance/">A single factor CRD and the one-way analysis of variance</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-2-24">
+    &nbsp;
+  </div>
+  <div class="pure-u-10-24">
+    
+    <nav class="next">
+      <a href="/post/a-bayesian-anova-model/">A Bayesian ANOVA model</a>
+    </nav>
+    
+  </div>
+  <div class="pure-u-1-24" style="text-align: right;">
+    
+    <a href="/post/a-bayesian-anova-model/"><i class="fa fa-chevron-right"></i></a>
+    
+  </div>
+</div>
+
+
+
+  
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'Your Disqus shortname';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+
+</div>
+</div>
+<script src="/js/ui.js"></script>
+<script src="/js/menus.js"></script>
+
+
+<script>
+  
+  if (window.location.hostname != "localhost") {
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'Your Google Analytics tracking ID', 'auto');
+    ga('send', 'pageview');
+  }
+</script>
+
+
+
+
+
+<script src="/js/math-code.js"></script>
+  <script async src="//cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  
+
+
+</body>
+</html>
+

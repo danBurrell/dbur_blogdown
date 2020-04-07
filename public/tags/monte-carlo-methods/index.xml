@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Monte Carlo Methods on Dandelbrot</title>
+    <link>/tags/monte-carlo-methods/</link>
+    <description>Recent content in Monte Carlo Methods on Dandelbrot</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy; 2016. All rights reserved.</copyright>
+    <lastBuildDate>Mon, 06 Apr 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/monte-carlo-methods/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>I&#39;m here to sample the pi!</title>
+      <link>/post/i-m-here-to-sample-the-pi/</link>
+      <pubDate>Mon, 06 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/i-m-here-to-sample-the-pi/</guid>
+      <description>In the very small amount of spare time that I have available, I’ve been trying to bring myself up to speed with Bayesian statistical models and in particular statistical sampling methods. As such I was watching this talk by Iain Murray on probabilistic modelling and I saw him explain the basics of Monte Carlo integration using a simple toy example of estimating the value of \(\pi\). Mind you, he gave that particular slide the title “A dumb approximation of \(\pi\)” because there are far better ways to do it.</description>
+    </item>
+    
+  </channel>
+</rss>
